@@ -71,13 +71,14 @@ app.get('/api/credential/:code', (req, res) => {
   }
 
   let decode = decodeJWT(data.jwt)
-  if (decode.payload.iss !== 'did:ethr:0x4a65a357b27c736f9493b761431f5afcc053e332') {
+  console.log('[decode]', decode)
+  if (decode.payload.iss !== 'did:ethr:0x2084aad2512f2e486081c36db4ecf46597ef034c') {
     return fail(res, 'El issuer no es valido')
   }
 
   let reply = {
-    didiserver: decode.payload.own.didiserver,
-    //didiserver: decode.payload.vc.credentialSubject.didiserver,
+    //didiserver: decode.payload.own.didiserver,
+    didiserver: decode.payload.own.didiserver.didiserver,
     iss: decode.payload.iss
   }
   success(res, reply)

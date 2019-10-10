@@ -84,9 +84,9 @@ app.get('/api/credential/:code', (req, res) => {
   success(res, reply)
 })
 
-
+let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8090
 // run the app server and tunneling service
-app.listen(8088, () => ngrok.connect(8088).then(ngrokUrl => {
+app.listen(port, () => ngrok.connect(port).then(ngrokUrl => {
   endpoint = ngrokUrl
   console.log(`Verification Service running, open at ${endpoint}`)
 }))

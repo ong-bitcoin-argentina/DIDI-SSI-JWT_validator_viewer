@@ -1,0 +1,19 @@
+{
+  "name": "didi-jwt-validator-viewer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "did-jwt": "^3.0.0",
+    "ethr-did-registry": "0.0.3",
+    "express": "^4.17.1",
+    "ngrok": "^3.2.5",
+    "uport-credentials": "^1.2.3",
+    "uport-transports": "^0.2.6"
+  }
+}

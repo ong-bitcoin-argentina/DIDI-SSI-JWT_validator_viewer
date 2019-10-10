@@ -1,3 +1,9 @@
+// Environment required
+if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY || !process.env.TMP_DID) {
+  throw new Error("Faltan las variables de entorno SERVER_DID y SERVER_PRIVATE_KEY")
+}
+
+
 const express = require('express')
 const bodyParser = require('body-parser')
 const ngrok = require('ngrok')
@@ -18,8 +24,8 @@ app.use(bodyParser.json({ type: '*/*' }))
 let codes = []
 const credentials = new Credentials({
   appName: 'Request Verification Example',
-  did: 'did:ethr:0x31486054a6ad2c0b685cd89ce0ba018e210d504e',
-  privateKey: 'ef6a01d0d98ba08bd23ee8b0c650076c65d629560940de9935d0f46f00679e01'
+  did: process.env.SERVER_DID,
+  privateKey: process.env.SERVER_PRIVATE_KEY
 })
 
 app.use("/", express.static(__dirname + '/public'));
@@ -72,7 +78,8 @@ app.get('/api/credential/:code', (req, res) => {
 
   let decode = decodeJWT(data.jwt)
   console.log('[decode]', decode)
-  if (decode.payload.iss !== 'did:ethr:0x2084aad2512f2e486081c36db4ecf46597ef034c') {
+  //TODO falta la validacion del issuer
+  if (decode.payload.iss !== process.env.TMP_DID) {
     return fail(res, 'El issuer no es valido')
   }
 

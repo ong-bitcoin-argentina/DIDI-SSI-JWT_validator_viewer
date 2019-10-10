@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>DIDI jwt validator viewer</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="row justify-content-md-center">
+        <div class="card mt-5 col-md-8">
+          <div class="card-body text-center">
+            <h3>DIDI Validator Viewer</h3>
+            <img id="qr" src="" />
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="fixed-bottom text-center p-3">
+      Powered by uport
+    </footer>
+    
+    <div id="qrModal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">QR para ingresar</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <img id="qr"/>
+        </div>
+      </div>
+    </div>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+  </body>
+  <script>
+    $(document).ready(function () {
+      $.get('/api/disclosure', function (res) {
+        console.log(res)
+        if (res.status === 'success') {
+          $('#qr').attr({ src: res.data.qr })
+          setInterval(function () {
+            checkCode(res.data.code)
+          }, 5000)
+        } else {
+          console.error(res)
+        }
+      });
+
+      function checkCode(code) {
+        $.get('/api/check/' + code, function(res) {
+          console.log(res)
+          if (res.status === 'success' && res.data) {
+            window.location.href = 'credentials.html?code=' + code;
+          }
+        })
+      }
+    });
+  </script>
+</html>

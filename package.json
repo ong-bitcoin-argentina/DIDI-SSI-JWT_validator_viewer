@@ -13,6 +13,7 @@
     "ethr-did-registry": "0.0.3",
     "express": "^4.17.1",
     "ngrok": "^3.2.5",
+    "randomstring": "^1.1.5",
     "uport-credentials": "^1.2.3",
     "uport-transports": "^0.2.6"
   }

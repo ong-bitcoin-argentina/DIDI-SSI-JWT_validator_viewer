@@ -84,7 +84,7 @@ app.get('/api/credential/:code', (req, res) => {
   let decode = decodeJWT(data.jwt)
   console.log('[decode]', decode)
   //TODO falta la validacion del issuer
-  if (decode.payload.iss !== process.env.TMP_DID) {
+  if (decode.payload.aud !== process.env.TMP_DID) {
     return fail(res, 'El issuer no es valido')
   }
 

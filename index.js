@@ -31,8 +31,10 @@ const credentials = new Credentials({
 app.use("/", express.static(__dirname + '/public'));
 app.get('/api/disclosure', (req, res) => {
   let code = randomstring.generate();
+  console.log(Date.now())
   credentials.createDisclosureRequest({
     verified: ['didiserver'],
+    exp: Math.floor(Date.now()/1000) + (60*60*24*365),
     callbackUrl: endpoint + '/api/callback/' + code
   }).then(requestToken => {
     console.log(decodeJWT(requestToken))  //log request token to console
@@ -49,6 +51,22 @@ app.get('/api/disclosure', (req, res) => {
 app.get('/api/check/:code', (req, res) => {
   let value = codes.find(c => c.code === req.params.code)
   success(res, value ? value.status : false)
+})
+
+app.get('/api/credential_viewer/:token',(req,res) => {
+  const jwt = req.params.token
+  credentials.authenticateDisclosureResponse(jwt).then(creds => {
+    console.log(creds)
+    let reply = {
+      //didiserver: decode.payload.own.didiserver,
+      didiserver: creds.didiserver,
+      iss: creds.verified.iss
+    }
+    success(res, reply)
+  }).catch(err => {
+    console.log(err)
+    error(res,"Error interno")
+  })
 })
 
 app.post('/api/callback/:code', (req, res) => {
@@ -79,21 +97,21 @@ app.get('/api/credential/:code', (req, res) => {
   let decode = decodeJWT(data.jwt)
   console.log('[decode]', decode)
   //TODO falta la validacion del issuer
-  if (decode.payload.iss !== process.env.TMP_DID) {
+  if (decode.payload.aud !== process.env.TMP_DID) {
     return fail(res, 'El issuer no es valido')
   }
 
   let reply = {
     //didiserver: decode.payload.own.didiserver,
-    didiserver: decode.payload.own.didiserver.didiserver,
-    iss: decode.payload.iss
+    didiserver: decode.payload.own.didiserver,
+    iss: decode.payload.aud
   }
   success(res, reply)
 })
 
-let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8090
+ let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8090
 // run the app server and tunneling service
 app.listen(port, () => ngrok.connect(port).then(ngrokUrl => {
   endpoint = ngrokUrl
   console.log(`Verification Service running, open at ${endpoint}`)
-}))
+})) 

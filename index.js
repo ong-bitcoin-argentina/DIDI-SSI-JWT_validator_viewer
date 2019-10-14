@@ -1,5 +1,5 @@
 // Environment required
-if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY || !process.env.TMP_DID) {
+if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY) {
   throw new Error("Faltan las variables de entorno SERVER_DID y SERVER_PRIVATE_KEY")
 }
 

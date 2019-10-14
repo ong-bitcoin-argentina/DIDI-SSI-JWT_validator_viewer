@@ -56,8 +56,8 @@
       function checkCode(code) {
         $.get('/api/check/' + code, function(res) {
           console.log(res)
-          if (res.status === 'success' && res.data) {
-            window.location.href = 'credentials.html?code=' + code;
+          if (res.status === 'success' && res.data.status) {
+            window.location.href = 'credentials.html?jwt=' + res.data.jwt;
           }
         })
       }

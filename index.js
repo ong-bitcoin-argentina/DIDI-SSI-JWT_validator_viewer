@@ -3,7 +3,7 @@ if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY || !process.env.T
   throw new Error("Faltan las variables de entorno SERVER_DID y SERVER_PRIVATE_KEY")
 }
 
-
+const didData = require('./did.json')
 const express = require('express')
 const bodyParser = require('body-parser')
 const ngrok = require('ngrok')
@@ -38,7 +38,7 @@ app.get('/api/disclosure', (req, res) => {
   credentials.createDisclosureRequest({
     verified: ['didiserver'],
     exp: Math.floor(Date.now()/1000) + (60*60*24*365),
-    callbackUrl: endpoint + '/api/callback/' + code
+    callbackUrl: url + '/api/callback/' + code
 
   }).then(requestToken => {
     console.log(decodeJWT(requestToken))  //log request token to console
@@ -54,17 +54,24 @@ app.get('/api/disclosure', (req, res) => {
 
 app.get('/api/check/:code', (req, res) => {
   let value = codes.find(c => c.code === req.params.code)
-  success(res, value ? value.status : false)
+  let reply = {
+    status: value ? value.status : false,
+    jwt: value.jwt
+  }
+  success(res, reply)
 })
 
 app.get('/api/credential_viewer/:token',(req,res) => {
   const jwt = req.params.token
   credentials.authenticateDisclosureResponse(jwt).then(creds => {
     console.log(creds)
+    let iss = creds.verified[0].iss
+    let didValue = didData.find(v => v.did === iss)
     let reply = {
       //didiserver: decode.payload.own.didiserver,
       didiserver: creds.didiserver,
-      iss: creds.verified.iss
+      iss,
+      name: didValue ? didValue.name : ''
     }
     success(res, reply)
   }).catch(err => {
@@ -83,13 +90,13 @@ app.post('/api/callback/:code', (req, res) => {
     console.log('[credencial]', creds)
     //console.log(creds.verified[0])
     codes = [...codes.filter(c => c.code !== code), { code, jwt, status: true }]
-    success(res, creds)
+    success(res, true)
   }).catch( err => {
     console.log(err)
     error(res, 'Error interno')
   })
 })
-
+/*
 app.get('/api/credential/:code', (req, res) => {
   const code = req.params.code
   let data = codes.find(c => c.code === code)
@@ -111,21 +118,13 @@ app.get('/api/credential/:code', (req, res) => {
     iss: decode.payload.aud
   }
   success(res, reply)
-})
+})*/
 
-<<<<<<< HEAD
- let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8090
-// run the app server and tunneling service
-app.listen(port, () => ngrok.connect(port).then(ngrokUrl => {
-  endpoint = ngrokUrl
-  console.log(`Verification Service running, open at ${endpoint}`)
-})) 
-=======
 
 // run the app server and tunneling service
 app.listen(port, () => {
   if (process.env.DISABLE_NGROK) {
-    console.log('Verification Service running, no NGROK')
+    console.log('Verification Service running, no NGROK', port)
   } else {
     ngrok.connect(port).then(ngrokUrl => {
       endpoint = ngrokUrl
@@ -133,4 +132,3 @@ app.listen(port, () => {
     })
   }
 })
->>>>>>> 6db1fe6e0aa22627f3abd3694ed81b905110f12c

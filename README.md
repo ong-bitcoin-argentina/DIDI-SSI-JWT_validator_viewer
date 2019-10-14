@@ -4,6 +4,7 @@
 
 SERVER_DID
 SERVER_PRIVATE_KEY
+DISABLE_NGROK : si esta definida deshabilita ngrok
 TMP_DID (did contra el que se valida el issuer, temporal mientras se construye la validacion)
 
 

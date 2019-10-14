@@ -17,7 +17,9 @@ const { success, fail, error } = require('./Utils')
 
 const app = express();
 
-let endpoint = ''
+let endpoint = null
+let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8090
+
 app.use(bodyParser.json({ type: '*/*' }))
 //setup Credentials object with newly created application identity.
 
@@ -30,12 +32,14 @@ const credentials = new Credentials({
 
 app.use("/", express.static(__dirname + '/public'));
 app.get('/api/disclosure', (req, res) => {
+  let url = endpoint !== null ? endpoint : 'http://' + req.hostname  + ':' + port
   let code = randomstring.generate();
   console.log(Date.now())
   credentials.createDisclosureRequest({
     verified: ['didiserver'],
     exp: Math.floor(Date.now()/1000) + (60*60*24*365),
     callbackUrl: endpoint + '/api/callback/' + code
+
   }).then(requestToken => {
     console.log(decodeJWT(requestToken))  //log request token to console
     const uri = message.paramsToQueryString(message.messageToURI(requestToken), {callback_type: 'post'})
@@ -109,9 +113,24 @@ app.get('/api/credential/:code', (req, res) => {
   success(res, reply)
 })
 
+<<<<<<< HEAD
  let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8090
 // run the app server and tunneling service
 app.listen(port, () => ngrok.connect(port).then(ngrokUrl => {
   endpoint = ngrokUrl
   console.log(`Verification Service running, open at ${endpoint}`)
 })) 
+=======
+
+// run the app server and tunneling service
+app.listen(port, () => {
+  if (process.env.DISABLE_NGROK) {
+    console.log('Verification Service running, no NGROK')
+  } else {
+    ngrok.connect(port).then(ngrokUrl => {
+      endpoint = ngrokUrl
+      console.log(`Verification Service running, open at ${ngrokUrl}`)
+    })
+  }
+})
+>>>>>>> 6db1fe6e0aa22627f3abd3694ed81b905110f12c

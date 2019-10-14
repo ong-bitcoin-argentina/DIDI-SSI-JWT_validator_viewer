@@ -45,7 +45,7 @@ app.get('/api/disclosure', (req, res) => {
     const uri = message.paramsToQueryString(message.messageToURI(requestToken), {callback_type: 'post'})
     const qr =  transports.ui.getImageDataURI(uri)
     codes.push({ code, status: false })
-    success(res, { code, qr })
+    success(res, { code, qr, requestToken })
   }).catch(e => {
     console.error(e)
     error(res, 'Error interno')
@@ -56,7 +56,7 @@ app.get('/api/check/:code', (req, res) => {
   let value = codes.find(c => c.code === req.params.code)
   let reply = {
     status: value ? value.status : false,
-    jwt: value.jwt
+    jwt: value ? value.jwt : ''
   }
   success(res, reply)
 })
@@ -76,7 +76,9 @@ app.get('/api/credential_viewer/:token',(req,res) => {
     success(res, reply)
   }).catch(err => {
     console.log(err)
-    error(res,"Error interno")
+    //TODO mostrar decode jwt en el error
+    let decode = decodeJWT(jwt)
+    error(res, { message: err.message, decode })
   })
 })
 

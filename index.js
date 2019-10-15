@@ -115,7 +115,7 @@ app.post('/api/verify', (req, res) => {
 
     let credential = decodeJWT(verified)
 
-    success(res, verified)
+    success(res, jwt)
   } catch(e) {
     console.error('error', e)
     error(res, e.message)

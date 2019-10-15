@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Validator</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="container">
+      <h1 class="display-4 p-3">Verificador</h1>
+      <div class="alert alert-danger d-none" role="alert">
+        <strong>Error:</strong> <span></span>
+      </div>
+      <div class="card mt-2">
+        <div class="card-body">
+          <div class="form-group">
+            <label>Ingresa el jwt</label>
+            <textarea id="jwt" class="form-control" rows="10"></textarea>
+          </div>
+          <button class="btn btn-primary btn-block" type="button" onclick="submit()">Verificar</button>
+        </div>
+      </div>
+    </div>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/custom.js"></script>
+  </body>
+  <script>
+    function submit() {
+      var jwt = $('#jwt').val()
+      $.post({
+        url: '/api/verify',
+        headers: { 'Content-Type': 'application/json' },
+        data: JSON.stringify({ jwt }),
+        success: onSuccess
+      });
+    }
+
+    function onSuccess(res) {
+      console.log(res)
+      if (res.status !== 'success') {
+        return
+      }
+      window.location.href = 'credentials.html?jwt=' + res.data;
+    }
+  </script>
+</html>

@@ -98,6 +98,29 @@ app.post('/api/callback/:code', (req, res) => {
     error(res, 'Error interno')
   })
 })
+
+app.post('/api/verify', (req, res) => {
+  let jwt = req.body.jwt
+  console.log(jwt)
+
+  //TODO verificar jwt
+  try {
+    let decode = decodeJWT(jwt)
+    console.log(decode)
+    let verified = decode.payload.verified[0]
+
+    if (!verified) {
+      return fail(res, 'No existe atributo verified')
+    }
+
+    let credential = decodeJWT(verified)
+
+    success(res, verified)
+  } catch(e) {
+    console.error('error', e)
+    error(res, e.message)
+  }  
+})
 /*
 app.get('/api/credential/:code', (req, res) => {
   const code = req.params.code

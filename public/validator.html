@@ -6,7 +6,6 @@
     <title>Validator</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
   </head>
-
   <body>
     <div class="container">
       <h1 class="display-4 p-3">Verificador</h1>
@@ -29,6 +28,7 @@
   </body>
   <script>
     function submit() {
+      $('.alert span').empty()
       var jwt = $('#jwt').val()
       $.post({
         url: '/api/verify',
@@ -41,6 +41,8 @@
     function onSuccess(res) {
       console.log(res)
       if (res.status !== 'success') {
+        $('.alert').removeClass('d-none')
+        $('.alert span').append(res.data)
         return
       }
       window.location.href = 'credentials.html?jwt=' + res.data;

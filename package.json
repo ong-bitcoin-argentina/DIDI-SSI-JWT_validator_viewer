@@ -11,10 +11,14 @@
   "license": "ISC",
   "dependencies": {
     "did-jwt": "^3.0.0",
+    "did-jwt-vc": "^0.1.1",
     "eth-did-resolver": "^0.1.1",
     "ethr-did-registry": "0.0.3",
+    "ethr-did-resolver": "^1.0.2",
     "express": "^4.17.1",
+    "express-nunjucks": "^2.2.3",
     "ngrok": "^3.2.5",
+    "nunjucks": "^3.2.0",
     "randomstring": "^1.1.5",
     "uport-credentials": "^1.2.3",
     "uport-transports": "^0.2.6"

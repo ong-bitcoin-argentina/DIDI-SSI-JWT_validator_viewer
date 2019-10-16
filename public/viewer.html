@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Certificado</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  </head>
+
+  <body>
+    <div class="container">
+  {% if error %}<div class="alert alert-danger" role="alert">{{error}}</div>{% endif %}
+     <div id="certificado">
+        <h1 class="display-4 p-3">Certificado</h1>
+        <div class="card mt-2">
+          <div class="card-body">
+            <div class="cart-title text-center">
+              <h5 id="issName">{{iss}}</h5>
+              <small class="text-muted" id="iss"></small>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item"><div class="row"><span class="col-2">Nombre:</span><span class="col-10" id="nombre">{{credential.didiserver.nombre}}</span> </div></li>
+              <li class="list-group-item"><div class="row"><span class="col-2">Apellido:</span><span class="col-10" id="apellido">{{credential.didiserver.apellido}}</span></div></li>
+              <li class="list-group-item"><div class="row"><span class="col-2">Curso:</span> <span class="col-10" id="curso">{{credential.didiserver.curso}}</span></div></li>
+              <li class="list-group-item"><div class="row"><span class="col-2">Duración:</span> <span class="col-10" id="duracion">{{credential.didiserver.duracion}}</span></div></li>
+              <li class="list-group-item"><div class="row"><span class="col-2">Fecha fin:</span><span class="col-10" id="fecha_fin">{{credential.didiserver.fecha_fin}}</span></div></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card mt-2">
+          <div class="card-body">
+            <small class="text-muted" id="jwt"></small>
+          </div>
+        </div>
+      </div>
+    </div>
+ <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="js/custom.js"></script>
+  </body>
+</html>

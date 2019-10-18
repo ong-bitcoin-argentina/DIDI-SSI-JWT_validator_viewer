@@ -19,6 +19,16 @@
         </div>
       </div>
     </div>
+   <div class="row">
+    <div class="card mt-5 col-md-8">
+      <div class="card-body text-center">
+      <h4>O ingrese su DID para solicitar el disclosure request a traves de Mouro</h4>
+      <form action="api/disclosurebymouro" method="GET">
+        <input type="text" name="did" id="did"/><input type="submit" id="submitByMouro" value="Generar via Mouro"/>
+      </form>
+      </div>
+    </div>
+   </div>
     <footer class="fixed-bottom text-center p-3">
       Powered by uport
     </footer>
@@ -61,6 +71,7 @@
           }
         })
       }
+
     });
   </script>
 </html>

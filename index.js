@@ -22,6 +22,7 @@ var message = require('uport-transports').message.util;
 var randomstring = require('randomstring');
 var _a = require('./Utils'), success = _a.success, fail = _a.fail, error = _a.error;
 var nunjucks = require('nunjucks');
+var addEdge = require('./Mouro').addEdge;
 var did_resolver_1 = require("did-resolver");
 var ethr_did_resolver_1 = require("ethr-did-resolver");
 var did_jwt_vc_1 = require("did-jwt-vc");
@@ -29,7 +30,7 @@ var app = express();
 nunjucks.configure("public", { autoescape: true, express: app });
 var resolver = new did_resolver_1.Resolver(ethr_did_resolver_1.getResolver());
 var endpoint = null;
-var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8090;
+var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 app.use(bodyParser.json({ type: '*/*' }));
 //setup Credentials object with newly created application identity.
 var codes = [];
@@ -70,6 +71,12 @@ app.get('/api/credential_viewer/:token', function (req, res) {
     var jwt = req.params.token;
     did_jwt_vc_1.verifyCredential(jwt, resolver).then(function (verifiedVC) {
         var data = verifiedVC.payload.vc.credentialSubject;
+        var tipo =Object.keys(data)[0]
+        var c_nombre= data[tipo].nombre
+        var c_apellido= data[tipo].apellido
+        var c_curso= data[tipo].curso
+        var c_duracion= data[tipo].duracion
+        var c_fecha_fin= data[tipo].fecha_fin
         var issuer = verifiedVC.payload.iss;
         var nombre = didData.filter(function (it) { return it.did === issuer; });
         var name = "";
@@ -79,7 +86,7 @@ app.get('/api/credential_viewer/:token', function (req, res) {
         else {
             name = nombre[0].name;
         }
-        res.render("viewer.html", { iss: name, credential: data, error: false });
+        res.render("viewer.html", { iss: name, tipo_credencial: tipo, nombre: c_nombre, apellido: c_apellido, curso: c_curso, duracion: c_duracion, fecha_fin: c_fecha_fin, error: false });
     })["catch"](function (err) {
         console.log(err);
         res.render("viewer.html", { iss: false, credential: false, error: err });
@@ -108,24 +115,35 @@ app.post('/api/verify', function (req, res) {
         console.log(credential);
         success(res, credential);
     });
-    //TODO verificar jwt
-    /*   try {
-        let decode = decodeJWT(jwt)
-        console.log(decode)
-        let verified = decode.payload.verified[0]
-    
-        if (!verified) {
-          return fail(res, 'No existe atributo verified')
-        }
-    
-        let credential = decodeJWT(verified)
-    
-        success(res, jwt)
-      } catch(e) {
-        console.error('error', e)
-        error(res, e.message)
-      }  */
 });
+app.get('/api/disclosurebymouro/', function (req, res) {
+    var url = endpoint !== null ? endpoint : 'http://' + req.hostname + ':' + port;
+    credentials.createDisclosureRequest({
+        verified: ['didiserver'],
+        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 365),
+        callbackUrl: url + '/api/callback/'
+    }).then(function (requestToken) {
+        var hash_mouro = addEdge(requestToken, req.query.did);
+        console.log(hash_mouro);
+    });
+});
+//TODO verificar jwt
+/*   try {
+    let decode = decodeJWT(jwt)
+    console.log(decode)
+    let verified = decode.payload.verified[0]
+
+    if (!verified) {
+      return fail(res, 'No existe atributo verified')
+    }
+
+    let credential = decodeJWT(verified)
+
+    success(res, jwt)
+  } catch(e) {
+    console.error('error', e)
+    error(res, e.message)
+  }  */
 /*
 app.get('/api/credential/:code', (req, res) => {
   const code = req.params.code

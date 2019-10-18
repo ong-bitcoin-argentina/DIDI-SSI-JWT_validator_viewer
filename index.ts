@@ -17,6 +17,8 @@ const { success, fail, error } = require('./Utils')
 
 const nunjucks = require('nunjucks');
 
+const { addEdge } = require('./Mouro')
+
 import { Resolver } from 'did-resolver'
 import { getResolver } from 'ethr-did-resolver'
 
@@ -31,7 +33,7 @@ const resolver = new Resolver(getResolver())
 
 
 let endpoint = null
-let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8090
+let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080
 
 app.use(bodyParser.json({ type: '*/*' }))
 //setup Credentials object with newly created application identity.
@@ -114,7 +116,19 @@ app.post('/api/verify', (req, res) => {
     console.log(credential)
     success(res,credential)
 })
+})
 
+app.get('/api/disclosurebymouro/', (req,res) => {
+  let url = endpoint !== null ? endpoint : 'http://' + req.hostname  + ':' + port
+  credentials.createDisclosureRequest({
+    verified: ['didiserver'],
+    exp: Math.floor(Date.now()/1000) + (60*60*24*365),
+    callbackUrl: url + '/api/callback/'
+  }).then(requestToken => {
+    var hash_mouro=addEdge(requestToken,req.query.did)
+    console.log(hash_mouro)
+})
+})
   //TODO verificar jwt
 /*   try {
     let decode = decodeJWT(jwt)
@@ -132,7 +146,7 @@ app.post('/api/verify', (req, res) => {
     console.error('error', e)
     error(res, e.message)
   }  */ 
-})
+
 /*
 app.get('/api/credential/:code', (req, res) => {
   const code = req.params.code

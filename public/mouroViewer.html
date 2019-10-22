@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Validator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="display-4 p-3">Browser de Credenciales Mouro</h1>
+      <div class="card mt-2">
+        <div class="card-body">
+          <form action="/api/myMouro/" method="GET">
+            <div class="form-group">
+                <label>DID</label>
+                <input name="did" id="did" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Private Key</label>
+                <input id="private_key" name="private_key" class="form-control" />
+            </div>
+            <button class="btn btn-primary btn-block" type="button" onclick="submit()">Verificar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/custom.js"></script>
+  </body>
+</html>

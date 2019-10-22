@@ -1,13 +1,13 @@
 const fetch = require('node-fetch');
 
 const uri = 'https://edge.uport.me/graphql'
-const query = "mutation{addEdge(edgeJWT: \"{edgeJWT}\"){hash,jwt,from {did},to{didTo},type,time,visibility,retention,tag,data}}"
+const query = "mutation{addEdge(edgeJWT: \"{edgeJWT}\"){hash,jwt,from {did},to{did},type,time,visibility,retention,tag,data}}"
 
 
-function addEdge(jwt,didTo) {
+function addEdge(jwt) {
   var temp = query.replace('{edgeJWT}', jwt)
   let data = {
-    query: temp.replace('{didTo}',didTo)
+    query: temp
   }
 
   console.log(data)

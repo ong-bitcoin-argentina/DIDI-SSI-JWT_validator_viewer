@@ -11,6 +11,8 @@ exports.__esModule = true;
 if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY) {
     throw new Error("Faltan las variables de entorno SERVER_DID y SERVER_PRIVATE_KEY");
 }
+
+var http = require('follow-redirects').http;
 var didData = require('./did.json');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -26,6 +28,7 @@ var addEdge = require('./Mouro').addEdge;
 var did_resolver_1 = require("did-resolver");
 var ethr_did_resolver_1 = require("ethr-did-resolver");
 var did_jwt_vc_1 = require("did-jwt-vc");
+var EthrDID = require('ethr-did');
 var app = express();
 nunjucks.configure("public", { autoescape: true, express: app });
 var resolver = new did_resolver_1.Resolver(ethr_did_resolver_1.getResolver());
@@ -108,6 +111,20 @@ app.post('/api/callback/:code', function (req, res) {
         error(res, 'Error interno');
     });
 });
+
+app.post('/api/callbackMouro', function (req, res) {
+    var jwt = req.body.access_token;
+    console.log('[JWT]', jwt);
+    console.log('[JWT decode]', decodeJWT(jwt));
+    credentials.authenticateDisclosureResponse(jwt).then(function (creds) {
+        console.log('[credencial]', creds);
+        success(res, true);
+    })["catch"](function (err) {
+        console.log(err);
+        error(res, 'Error interno');
+    });
+});
+
 app.post('/api/verify', function (req, res) {
     var jwt = req.body.jwt;
     did_jwt_vc_1.verifyCredential(jwt, resolver).then(function (verifiedVC) {
@@ -121,53 +138,46 @@ app.get('/api/disclosurebymouro/', function (req, res) {
     credentials.createDisclosureRequest({
         verified: ['didiserver'],
         exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 365),
-        callbackUrl: url + '/api/callback/'
+        callbackUrl: url + '/api/callbackMouro/'
     }).then(function (requestToken) {
-        var hash_mouro = addEdge(requestToken, req.query.did);
-        console.log(hash_mouro);
+        console.log(requestToken)
+        credentials.signJWT({
+            "sub": req.query.did,
+            'disclosureRequest': requestToken,
+            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30)
+        }).then(function(token){
+            var hash_mouro = addEdge(token)
+            res.render("disclosurebymouro.html")
+        })
     });
 });
-//TODO verificar jwt
-/*   try {
-    let decode = decodeJWT(jwt)
-    console.log(decode)
-    let verified = decode.payload.verified[0]
 
-    if (!verified) {
-      return fail(res, 'No existe atributo verified')
-    }
+app.get('/api/mouroViewer/', function(req, res) {
+    res.render('mouroViewer.html')
+})
 
-    let credential = decodeJWT(verified)
+app.get('/api/myMouro/', function(req, res) {
+    var did=  req.query.did
+    var private_key= req.query.private_key 
+    var vcissuer = new EthrDID({
+        address: did,
+        privateKey: private_key
+    });
+    vcissuer.signJWT({
+        sub: "did:ethr:" + did,
+        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) // what is a reasonable value here?
+    }).then(function (token) {
+        var input='{"query": "{findEdges(toDID: ["did:ethr:' + did + '"]){hash,jwt,from {did},to {did},type,time,visibility,retention,tag,data }}"}'
+        const request = require('request');
+        request.post('http://edge.uport.me', {'auth': {'bearer': token, 'sendInmediately': true},'body': input, 'followAllRedirects':true},function(error,response,body) {
+            console.log(body);
+        })
+    });
+    
+    res.render("myMouro.html")
+})
 
-    success(res, jwt)
-  } catch(e) {
-    console.error('error', e)
-    error(res, e.message)
-  }  */
-/*
-app.get('/api/credential/:code', (req, res) => {
-  const code = req.params.code
-  let data = codes.find(c => c.code === code)
 
-  if (!data) {
-    return fail(res, 'El codigo no existe')
-  }
-
-  let decode = decodeJWT(data.jwt)
-  console.log('[decode]', decode)
-  //TODO falta la validacion del issuer
-  if (decode.payload.aud !== process.env.TMP_DID) {
-    return fail(res, 'El issuer no es valido')
-  }
-
-  let reply = {
-    //didiserver: decode.payload.own.didiserver,
-    didiserver: decode.payload.own.didiserver,
-    iss: decode.payload.aud
-  }
-  success(res, reply)
-})*/
-// run the app server and tunneling service
 app.listen(port, function () {
     if (process.env.DISABLE_NGROK) {
         console.log('Verification Service running, no NGROK', port);

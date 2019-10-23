@@ -83,7 +83,14 @@ app.get('/api/credential_viewer/:token', function (req, res) {
             name = nombre[0].name;
         }
         console.log(name, data);
-        res.render("viewer.html", { iss: name, credential: data, error: false });
+        var tipo_credencial = 'didiserver';
+        if (data.didiserver_curso) {
+            tipo_credencial = 'curso';
+        }
+        else if (data.didiserver_identidad) {
+            tipo_credencial = 'identidad';
+        }
+        res.render("viewer.html", { iss: name, credential: data, tipo_credencial: tipo_credencial, error: false });
     })["catch"](function (err) {
         console.log(err);
         res.render("viewer.html", { iss: false, credential: false, error: err });

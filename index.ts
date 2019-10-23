@@ -87,7 +87,13 @@ app.get('/api/credential_viewer/:token',(req,res) => {
     var name : String = ""
     if ( nombre.length === 0 ) {name= issuer + " (emisor desconocido)"} else {name= nombre[0].name}
     console.log(name, data)
-    res.render("viewer.html",{iss: name, credential: data, error: false})
+    var tipo_credencial = 'didiserver'
+    if (data.didiserver_curso) {
+      tipo_credencial = 'curso'
+    } else if (data.didiserver_identidad) {
+      tipo_credencial = 'identidad'
+    }
+    res.render("viewer.html",{iss: name, credential: data, tipo_credencial, error: false})
   }).catch(function(err) {
     console.log(err)
     res.render("viewer.html",{iss: false ,credential: false ,error: err})

@@ -81,12 +81,12 @@ app.get('/api/credential_viewer/:token',(req,res) => {
   const jwt = req.params.token
   console.log('[credential_viewer]', jwt)
   verifyCredential(jwt, resolver).then(function(verifiedVC) {
-    console.log(verifiedVC)
     const data= verifiedVC.payload.vc.credentialSubject
     const issuer = verifiedVC.payload.iss
     var nombre = didData.filter(it => it.did === issuer)
-    var name:String=""
-    if ( nombre.length==0 ) {name= issuer + " (emisor desconocido)"} else {name= nombre[0].name}
+    var name : String = ""
+    if ( nombre.length === 0 ) {name= issuer + " (emisor desconocido)"} else {name= nombre[0].name}
+    console.log(name, data)
     res.render("viewer.html",{iss: name, credential: data, error: false})
   }).catch(function(err) {
     console.log(err)

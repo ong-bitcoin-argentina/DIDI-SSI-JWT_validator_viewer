@@ -79,7 +79,9 @@ app.get('/api/check/:code', (req, res) => {
 
 app.get('/api/credential_viewer/:token',(req,res) => {
   const jwt = req.params.token
+  console.log('[credential_viewer]', jwt)
   verifyCredential(jwt, resolver).then(function(verifiedVC) {
+    console.log(verifiedVC)
     const data= verifiedVC.payload.vc.credentialSubject
     const issuer = verifiedVC.payload.iss
     var nombre = didData.filter(it => it.did === issuer)

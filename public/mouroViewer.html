@@ -55,7 +55,9 @@
 
     function item(edge) {
       return (
-        '<li class="list-group-item"><p>{hash}</p></li>'.replace('{hash}', edge.hash)
+        '<li class="list-group-item">' +
+          '<a href="/api/credential_viewer/' + edge.jwt + '">' +
+          '<code>{jwt}</code></a></li>'.replace('{jwt}', edge.jwt)
       )
     }
   </script>

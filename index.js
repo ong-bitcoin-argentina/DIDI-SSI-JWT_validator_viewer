@@ -70,7 +70,9 @@ app.get('/api/check/:code', function (req, res) {
 });
 app.get('/api/credential_viewer/:token', function (req, res) {
     var jwt = req.params.token;
+    console.log('[credential_viewer]', jwt);
     did_jwt_vc_1.verifyCredential(jwt, resolver).then(function (verifiedVC) {
+        console.log(verifiedVC);
         var data = verifiedVC.payload.vc.credentialSubject;
         var issuer = verifiedVC.payload.iss;
         var nombre = didData.filter(function (it) { return it.did === issuer; });

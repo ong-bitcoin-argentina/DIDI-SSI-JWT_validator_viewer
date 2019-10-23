@@ -12,12 +12,13 @@ const { Credentials } = require('uport-credentials')
 const transports = require('uport-transports').transport
 const message = require('uport-transports').message.util
 const randomstring = require('randomstring')
+var EthrDID = require('ethr-did');
 
 const { success, fail, error } = require('./Utils')
 
 const nunjucks = require('nunjucks');
 
-const { addEdge } = require('./Mouro')
+const { addEdge, fetchEdges } = require('./Mouro')
 
 import { Resolver } from 'did-resolver'
 import { getResolver } from 'ethr-did-resolver'
@@ -35,7 +36,7 @@ const resolver = new Resolver(getResolver())
 let endpoint = null
 let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080
 
-app.use(bodyParser.json({ type: '*/*' }))
+app.use(bodyParser.json())
 //setup Credentials object with newly created application identity.
 
 let codes = []
@@ -129,6 +130,42 @@ app.get('/api/disclosurebymouro/', (req,res) => {
     console.log(hash_mouro)
 })
 })
+
+app.get('/api/mouroViewer', function (req, res) {
+  res.render('mouroViewer.html')
+})
+
+app.post('/api/myMouro', function (req, res) {
+  var did = req.body.did
+  var private_key = req.body.private_key
+
+  console.log("keys", did, private_key)
+  var vcissuer = new EthrDID({
+    address: did,
+    privateKey: private_key
+  });
+
+  vcissuer.signJWT({
+    sub: "did:ethr:" + did,
+    exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) // what is a reasonable value here?
+  }).then(token => fetchEdges(did, token)
+    /*var input = '{"query": "{findEdges(toDID: ["did:ethr:' + did + '"]){hash,jwt,from {did},to {did},type,time,visibility,retention,tag,data }}"}'
+    const request = require('request');
+    request.post('http://edge.uport.me', { 'auth': { 'bearer': token, 'sendInmediately': true }, 'body': input, 'followAllRedirects': true }, function (error, response, body) {
+      console.log(body);
+    })*/
+  ).then(body => {
+    console.log(body.data.findEdges)
+    if (body.errors) {
+      return error(res, body.errors)
+    }
+    success(res, body.data.findEdges)
+    //res.render("myMouro.html", { edges: body.data.findEdges })
+  }).catch(e => {
+    console.error(e)
+    res.render("error.html")
+  });
+})
   //TODO verificar jwt
 /*   try {
     let decode = decodeJWT(jwt)
@@ -179,7 +216,7 @@ app.listen(port, () => {
   } else {
     ngrok.connect(port).then(ngrokUrl => {
       endpoint = ngrokUrl
-      console.log(`Verification Service running, open at ${ngrokUrl}`)
+      console.log(`Verification Service running, open at ${ngrokUrl}`, port)
     })
   }
 })

@@ -11,8 +11,6 @@ exports.__esModule = true;
 if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY) {
     throw new Error("Faltan las variables de entorno SERVER_DID y SERVER_PRIVATE_KEY");
 }
-
-var http = require('follow-redirects').http;
 var didData = require('./did.json');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -22,19 +20,19 @@ var Credentials = require('uport-credentials').Credentials;
 var transports = require('uport-transports').transport;
 var message = require('uport-transports').message.util;
 var randomstring = require('randomstring');
+var EthrDID = require('ethr-did');
 var _a = require('./Utils'), success = _a.success, fail = _a.fail, error = _a.error;
 var nunjucks = require('nunjucks');
-var addEdge = require('./Mouro').addEdge;
+var _b = require('./Mouro'), addEdge = _b.addEdge, fetchEdges = _b.fetchEdges;
 var did_resolver_1 = require("did-resolver");
 var ethr_did_resolver_1 = require("ethr-did-resolver");
 var did_jwt_vc_1 = require("did-jwt-vc");
-var EthrDID = require('ethr-did');
 var app = express();
 nunjucks.configure("public", { autoescape: true, express: app });
 var resolver = new did_resolver_1.Resolver(ethr_did_resolver_1.getResolver());
 var endpoint = null;
 var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
-app.use(bodyParser.json({ type: '*/*' }));
+app.use(bodyParser.json());
 //setup Credentials object with newly created application identity.
 var codes = [];
 var credentials = new Credentials({
@@ -74,12 +72,6 @@ app.get('/api/credential_viewer/:token', function (req, res) {
     var jwt = req.params.token;
     did_jwt_vc_1.verifyCredential(jwt, resolver).then(function (verifiedVC) {
         var data = verifiedVC.payload.vc.credentialSubject;
-        var tipo =Object.keys(data)[0]
-        var c_nombre= data[tipo].nombre
-        var c_apellido= data[tipo].apellido
-        var c_curso= data[tipo].curso
-        var c_duracion= data[tipo].duracion
-        var c_fecha_fin= data[tipo].fecha_fin
         var issuer = verifiedVC.payload.iss;
         var nombre = didData.filter(function (it) { return it.did === issuer; });
         var name = "";
@@ -89,7 +81,7 @@ app.get('/api/credential_viewer/:token', function (req, res) {
         else {
             name = nombre[0].name;
         }
-        res.render("viewer.html", { iss: name, tipo_credencial: tipo, nombre: c_nombre, apellido: c_apellido, curso: c_curso, duracion: c_duracion, fecha_fin: c_fecha_fin, error: false });
+        res.render("viewer.html", { iss: name, credential: data, error: false });
     })["catch"](function (err) {
         console.log(err);
         res.render("viewer.html", { iss: false, credential: false, error: err });
@@ -111,20 +103,6 @@ app.post('/api/callback/:code', function (req, res) {
         error(res, 'Error interno');
     });
 });
-
-app.post('/api/callbackMouro', function (req, res) {
-    var jwt = req.body.access_token;
-    console.log('[JWT]', jwt);
-    console.log('[JWT decode]', decodeJWT(jwt));
-    credentials.authenticateDisclosureResponse(jwt).then(function (creds) {
-        console.log('[credencial]', creds);
-        success(res, true);
-    })["catch"](function (err) {
-        console.log(err);
-        error(res, 'Error interno');
-    });
-});
-
 app.post('/api/verify', function (req, res) {
     var jwt = req.body.jwt;
     did_jwt_vc_1.verifyCredential(jwt, resolver).then(function (verifiedVC) {
@@ -138,27 +116,19 @@ app.get('/api/disclosurebymouro/', function (req, res) {
     credentials.createDisclosureRequest({
         verified: ['didiserver'],
         exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 365),
-        callbackUrl: url + '/api/callbackMouro/'
+        callbackUrl: url + '/api/callback/'
     }).then(function (requestToken) {
-        console.log(requestToken)
-        credentials.signJWT({
-            "sub": req.query.did,
-            'disclosureRequest': requestToken,
-            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30)
-        }).then(function(token){
-            var hash_mouro = addEdge(token)
-            res.render("disclosurebymouro.html")
-        })
+        var hash_mouro = addEdge(requestToken, req.query.did);
+        console.log(hash_mouro);
     });
 });
-
-app.get('/api/mouroViewer/', function(req, res) {
-    res.render('mouroViewer.html')
-})
-
-app.get('/api/myMouro/', function(req, res) {
-    var did=  req.query.did
-    var private_key= req.query.private_key 
+app.get('/api/mouroViewer', function (req, res) {
+    res.render('mouroViewer.html');
+});
+app.post('/api/myMouro', function (req, res) {
+    var did = req.body.did;
+    var private_key = req.body.private_key;
+    console.log("keys", did, private_key);
     var vcissuer = new EthrDID({
         address: did,
         privateKey: private_key
@@ -166,18 +136,65 @@ app.get('/api/myMouro/', function(req, res) {
     vcissuer.signJWT({
         sub: "did:ethr:" + did,
         exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) // what is a reasonable value here?
-    }).then(function (token) {
-        var input='{"query": "{findEdges(toDID: ["did:ethr:' + did + '"]){hash,jwt,from {did},to {did},type,time,visibility,retention,tag,data }}"}'
-        const request = require('request');
-        request.post('http://edge.uport.me', {'auth': {'bearer': token, 'sendInmediately': true},'body': input, 'followAllRedirects':true},function(error,response,body) {
-            console.log(body);
-        })
+    }).then(function (token) { return fetchEdges(did, token); }
+    /*var input = '{"query": "{findEdges(toDID: ["did:ethr:' + did + '"]){hash,jwt,from {did},to {did},type,time,visibility,retention,tag,data }}"}'
+    const request = require('request');
+    request.post('http://edge.uport.me', { 'auth': { 'bearer': token, 'sendInmediately': true }, 'body': input, 'followAllRedirects': true }, function (error, response, body) {
+      console.log(body);
+    })*/
+    ).then(function (body) {
+        console.log(body.data.findEdges);
+        if (body.errors) {
+            return error(res, body.errors);
+        }
+        success(res, body.data.findEdges);
+        //res.render("myMouro.html", { edges: body.data.findEdges })
+    })["catch"](function (e) {
+        console.error(e);
+        res.render("error.html");
     });
-    
-    res.render("myMouro.html")
-})
+});
+//TODO verificar jwt
+/*   try {
+    let decode = decodeJWT(jwt)
+    console.log(decode)
+    let verified = decode.payload.verified[0]
 
+    if (!verified) {
+      return fail(res, 'No existe atributo verified')
+    }
 
+    let credential = decodeJWT(verified)
+
+    success(res, jwt)
+  } catch(e) {
+    console.error('error', e)
+    error(res, e.message)
+  }  */
+/*
+app.get('/api/credential/:code', (req, res) => {
+  const code = req.params.code
+  let data = codes.find(c => c.code === code)
+
+  if (!data) {
+    return fail(res, 'El codigo no existe')
+  }
+
+  let decode = decodeJWT(data.jwt)
+  console.log('[decode]', decode)
+  //TODO falta la validacion del issuer
+  if (decode.payload.aud !== process.env.TMP_DID) {
+    return fail(res, 'El issuer no es valido')
+  }
+
+  let reply = {
+    //didiserver: decode.payload.own.didiserver,
+    didiserver: decode.payload.own.didiserver,
+    iss: decode.payload.aud
+  }
+  success(res, reply)
+})*/
+// run the app server and tunneling service
 app.listen(port, function () {
     if (process.env.DISABLE_NGROK) {
         console.log('Verification Service running, no NGROK', port);
@@ -185,7 +202,7 @@ app.listen(port, function () {
     else {
         ngrok.connect(port).then(function (ngrokUrl) {
             endpoint = ngrokUrl;
-            console.log("Verification Service running, open at " + ngrokUrl);
+            console.log("Verification Service running, open at " + ngrokUrl, port);
         });
     }
 });

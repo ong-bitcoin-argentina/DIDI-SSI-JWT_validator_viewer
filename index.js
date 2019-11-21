@@ -95,7 +95,18 @@ app.get("/api/credential_viewer/:token", function(req, res) {
 			const credential = Object.values(data)[0];
 			const credentialPreview = credential["preview"];
 			const credentialData = credential["data"];
-			const credentialDataKeys = Object.keys(credential["data"]);
+			const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
+				return (
+					credentialPreview["fields"].indexOf(b) >= credentialPreview["fields"].indexOf(a)
+				);
+			});
+
+			for (let key of credentialDataKeys) {
+				credentialData[key] = {
+					data: credentialData[key],
+					toPreview: credentialPreview["fields"].indexOf(key) >= 0
+				};
+			}
 
 			var name = Object.keys(data)[0];
 			res.render("viewer.html", {

@@ -33,12 +33,21 @@
 								{% for key in credentialDataKeys %}
 								<li class="list-group-item">
 									<div class="row">
+										{% if credentialData[key].toPreview %}
+										<span class="col-4" style="font-weight: bold;">
+											{{key}}:
+										</span>
+										<span class="col-8" id="nombre" style="font-weight: bold;">
+											{{credentialData[key].data}}
+										</span>
+										{% else %}
 										<span class="col-4">
 											{{key}}:
 										</span>
 										<span class="col-8" id="nombre">
-											{{credentialData[key]}}
+											{{credentialData[key].data}}
 										</span>
+										{% endif %}
 									</div>
 								</li>
 								{% endfor %}

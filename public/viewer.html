@@ -13,6 +13,10 @@
 			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
 			crossorigin="anonymous"
 		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+		/>
 	</head>
 
 	<body>
@@ -21,11 +25,29 @@
 			<div class="alert alert-danger" role="alert">{{error}}</div>
 			{% endif %}
 			<div id="certificado">
-				<h1 class="display-4 p-3">Certificado</h1>
+				<div style="display: flex;">
+					<h1 class="display-4 p-3">Certificado</h1>
+					{% if error === false %}
+					<i
+						style="color:green; margin-top: 25px;"
+						class="fa fa-check-circle fa-3x"
+						aria-hidden="true"
+					></i>
+					{% endif %}
+				</div>
 				<div class="card mt-2">
 					<div class="card-body">
 						<div class="cart-title text-center">
-							<h5 id="issName">{{iss}}</h5>
+							<div style="display: flex;justify-content: center;">
+								<h5 id="issName">{{iss}}</h5>
+								{% if error === false %}
+								<i
+									style="color:green;margin-top: 5px;margin-left: 5px;"
+									class="fa fa-check"
+									aria-hidden="true"
+								></i>
+								{% endif %}
+							</div>
 							<small class="text-muted" id="iss"></small>
 						</div>
 						<ul class="list-group list-group-flush">

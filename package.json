@@ -1,33 +1,33 @@
 {
-  "name": "didi-jwt-validator-viewer",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ."
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "did-jwt": "^3.0.0",
-    "did-jwt-vc": "^0.1.1",
-    "did-resolver": "^1.0.0",
-    "eth-did-resolver": "^0.1.1",
-    "ethr-did": "^1.1.0",
-    "ethr-did-registry": "0.0.3",
-    "ethr-did-resolver": "^1.0.2",
-    "express": "^4.17.1",
-    "express-nunjucks": "^2.2.3",
-    "follow-redirects": "^1.9.0",
-    "http": "0.0.0",
-    "ngrok": "^3.2.5",
-    "node-fetch": "^2.6.0",
-    "node.fetch": "^1.0.0",
-    "nunjucks": "^3.2.0",
-    "randomstring": "^1.1.5",
-    "request": "^2.88.0",
-    "uport-credentials": "^1.2.3",
-    "uport-transports": "^0.2.6"
-  }
+	"name": "didi-jwt-validator-viewer",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "DIDI_API=http://localhost:3000/api/1.0/didi/ SERVER_DID=did:ethr:***REMOVED*** SERVER_PRIVATE_KEY=***REMOVED*** DISABLE_NGROK=true node ."
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"did-jwt": "^3.0.0",
+		"did-jwt-vc": "^0.1.1",
+		"did-resolver": "^1.0.0",
+		"eth-did-resolver": "^0.1.1",
+		"ethr-did": "^1.1.0",
+		"ethr-did-registry": "0.0.3",
+		"ethr-did-resolver": "^1.0.2",
+		"express": "^4.17.1",
+		"express-nunjucks": "^2.2.3",
+		"follow-redirects": "^1.9.0",
+		"http": "0.0.0",
+		"ngrok": "^3.2.5",
+		"node-fetch": "^2.6.0",
+		"node.fetch": "^1.0.0",
+		"nunjucks": "^3.2.0",
+		"randomstring": "^1.1.5",
+		"request": "^2.88.0",
+		"uport-credentials": "^1.2.3",
+		"uport-transports": "^0.2.6"
+	}
 }

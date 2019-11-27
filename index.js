@@ -15,6 +15,7 @@ if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY) {
 		"Faltan las variables de entorno SERVER_DID y SERVER_PRIVATE_KEY"
 	);
 }
+var fetch = require("node-fetch");
 var didData = require("./did.json");
 var express = require("express");
 var bodyParser = require("body-parser");
@@ -84,21 +85,50 @@ app.get("/api/check/:code", function(req, res) {
 	};
 	success(res, reply);
 });
+
+const verifyCert = function(cert, cb, errCb) {
+	const route = process.env.DIDI_API + "issuer/verifyCertificate";
+
+	fetch(route, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			jwt: cert
+		})
+	})
+		.then(response => {
+			return response.json();
+		})
+		.then(res => {
+			if (res.data.err) {
+				return cb(res.data.cert, res.data.err.message);
+			} else {
+				return cb(res.data);
+			}
+		})
+		.catch(err => {
+			console.log(err);
+			return errCb(err);
+		});
+};
+
 app.get("/api/credential_viewer/:token", function(req, res) {
 	var jwt = req.params.token;
 	console.log("[credential_viewer]", jwt);
-	did_jwt_vc_1
-		.verifyCredential(jwt, resolver)
-		.then(function(verifiedVC) {
-			var data = verifiedVC.payload.vc.credentialSubject;
+
+	verifyCert(
+		jwt,
+		function(result, err) {
+			var data = result.payload.vc.credentialSubject;
 
 			const credential = Object.values(data)[0];
 			const credentialPreview = credential["preview"];
 			const credentialData = credential["data"];
 			const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
-				return (
-					credentialPreview["fields"].indexOf(b) >= credentialPreview["fields"].indexOf(a)
-				);
+				return credentialPreview["fields"].indexOf(b) >=
+					credentialPreview["fields"].indexOf(a)
+					? 1
+					: -1;
 			});
 
 			for (let key of credentialDataKeys) {
@@ -108,19 +138,22 @@ app.get("/api/credential_viewer/:token", function(req, res) {
 				};
 			}
 
-			var name = Object.keys(data)[0];
 			res.render("viewer.html", {
-				iss: name,
+				iss: result.issuer,
 				credentialData: credentialData,
 				credentialDataKeys: credentialDataKeys,
 				credentialPreview: credentialPreview,
-				error: false
+				error: err ? err : false
 			});
-		})
-		["catch"](function(err) {
-			console.log(err);
-			res.render("viewer.html", { iss: false, credential: false, error: err });
-		});
+		},
+		function(err) {
+			return res.render("viewer.html", {
+				iss: false,
+				credential: false,
+				error: err.message
+			});
+		}
+	);
 });
 app.post("/api/callback/:code", function(req, res) {
 	var code = req.params.code;

@@ -97,6 +97,8 @@ const verifyCert = function(cert, cb, errCb) {
 			return response.json();
 		})
 		.then(res => {
+			if (res.status === "error") return errCb(res);
+
 			if (res.data.err) {
 				return cb(res.data.cert, res.data.err.message);
 			} else {
@@ -109,7 +111,7 @@ const verifyCert = function(cert, cb, errCb) {
 		});
 };
 
-app.get("/api/credential_viewer/:token", (req, res) => {
+app.get("/api/credential_viewer/:token", function(req, res) {
 	var jwt = req.params.token;
 	console.log("[credential_viewer]", jwt);
 

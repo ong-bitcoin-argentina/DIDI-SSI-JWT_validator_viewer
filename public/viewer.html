@@ -27,7 +27,13 @@
 			<div id="certificado">
 				<div style="display: flex;">
 					<h1 class="display-4 p-3">Certificado</h1>
-					{% if error === false %}
+					{% if credential === false %}
+					<i
+						style="color:red; margin-top: 25px;"
+						class="fa fa-ban fa-3x"
+						aria-hidden="true"
+					></i>
+					{% else %}
 					<i
 						style="color:green; margin-top: 25px;"
 						class="fa fa-check-circle fa-3x"
@@ -38,16 +44,25 @@
 				<div class="card mt-2">
 					<div class="card-body">
 						<div class="cart-title text-center">
+							{% if credential !== false %} {% if error === false %}
 							<div style="display: flex;justify-content: center;">
 								<h5 id="issName">{{iss}}</h5>
-								{% if error === false %}
 								<i
 									style="color:green;margin-top: 5px;margin-left: 5px;"
 									class="fa fa-check"
 									aria-hidden="true"
 								></i>
-								{% endif %}
 							</div>
+							{% else %}
+							<div style="display: flex;justify-content: center;">
+								<h5 id="issName">Emisor no registrado</h5>
+								<i
+									style="color:red;margin-top: 5px;margin-left: 5px;"
+									class="fa fa-times"
+									aria-hidden="true"
+								></i>
+							</div>
+							{% endif %} {% endif %}
 							<small class="text-muted" id="iss"></small>
 						</div>
 						<ul class="list-group list-group-flush">

@@ -100,6 +100,8 @@ const verifyCert = function(cert, cb, errCb) {
 			return response.json();
 		})
 		.then(res => {
+			if (res.status === "error") return errCb(res);
+
 			if (res.data.err) {
 				return cb(res.data.cert, res.data.err.message);
 			} else {

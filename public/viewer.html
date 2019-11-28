@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+		<title>Certificado</title>
+		<link
+			rel="stylesheet"
+			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+		/>
+	</head>
+
+	<body>
+		<div class="container">
+			{% if error %}
+			<div class="alert alert-danger" role="alert">{{error}}</div>
+			{% endif %}
+			<div id="certificado">
+				<div style="display: flex;">
+					<h1 class="display-4 p-3">Certificado</h1>
+					{% if credential === false %}
+					<i
+						style="color:red; margin-top: 25px;"
+						class="fa fa-ban fa-3x"
+						aria-hidden="true"
+					></i>
+					{% else %}
+					<i
+						style="color:green; margin-top: 25px;"
+						class="fa fa-check-circle fa-3x"
+						aria-hidden="true"
+					></i>
+					{% endif %}
+				</div>
+				<div class="card mt-2">
+					<div class="card-body">
+						<div class="cart-title text-center">
+							{% if credential !== false %} {% if error === false %}
+							<div style="display: flex;justify-content: center;">
+								<h5 id="issName">{{iss}}</h5>
+								<i
+									style="color:green;margin-top: 5px;margin-left: 5px;"
+									class="fa fa-check"
+									aria-hidden="true"
+								></i>
+							</div>
+							{% else %}
+							<div style="display: flex;justify-content: center;">
+								<h5 id="issName">Emisor no registrado</h5>
+								<i
+									style="color:red;margin-top: 5px;margin-left: 5px;"
+									class="fa fa-times"
+									aria-hidden="true"
+								></i>
+							</div>
+							{% endif %} {% endif %}
+							<small class="text-muted" id="iss"></small>
+						</div>
+						<ul class="list-group list-group-flush">
+							<ul>
+								{% for key in credentialDataKeys %}
+								<li class="list-group-item">
+									<div class="row">
+										{% if credentialData[key].toPreview %}
+										<span class="col-4" style="font-weight: bold;">
+											{{key}}:
+										</span>
+										<span class="col-8" id="nombre" style="font-weight: bold;">
+											{{credentialData[key].data}}
+										</span>
+										{% else %}
+										<span class="col-4">
+											{{key}}:
+										</span>
+										<span class="col-8" id="nombre">
+											{{credentialData[key].data}}
+										</span>
+										{% endif %}
+									</div>
+								</li>
+								{% endfor %}
+							</ul>
+							<div id="certificateData"></div>
+						</ul>
+					</div>
+				</div>
+				<div class="card mt-2">
+					<div class="card-body">
+						<small class="text-muted" id="jwt"></small>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script
+			src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+			integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+			integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+			integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+			crossorigin="anonymous"
+		></script>
+	</body>
+</html>

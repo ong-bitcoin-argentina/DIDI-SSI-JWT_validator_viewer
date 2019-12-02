@@ -44,21 +44,21 @@
 				<div class="card mt-2">
 					<div class="card-body">
 						<div class="cart-title text-center">
-							{% if credential !== false %} {% if error === false %}
-							<div style="display: flex;justify-content: center;">
-								<h5 id="issName">{{iss}}</h5>
-								<i
-									style="color:green;margin-top: 5px;margin-left: 5px;"
-									class="fa fa-check"
-									aria-hidden="true"
-								></i>
-							</div>
-							{% else %}
+							{% if credential !== false %} {% if iss === false %}
 							<div style="display: flex;justify-content: center;">
 								<h5 id="issName">Emisor no registrado</h5>
 								<i
 									style="color:red;margin-top: 5px;margin-left: 5px;"
 									class="fa fa-times"
+									aria-hidden="true"
+								></i>
+							</div>
+							{% else %}
+							<div style="display: flex;justify-content: center;">
+								<h5 id="issName">{{iss}}</h5>
+								<i
+									style="color:green;margin-top: 5px;margin-left: 5px;"
+									class="fa fa-check"
 									aria-hidden="true"
 								></i>
 							</div>

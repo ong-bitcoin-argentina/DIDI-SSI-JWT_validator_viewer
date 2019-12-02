@@ -141,7 +141,7 @@ app.get("/api/credential_viewer/:token", function(req, res) {
 			}
 
 			res.render("viewer.html", {
-				iss: result.issuer,
+				iss: result.issuer ? result.issuer : false,
 				credentialData: credentialData,
 				credentialDataKeys: credentialDataKeys,
 				credentialPreview: credentialPreview,

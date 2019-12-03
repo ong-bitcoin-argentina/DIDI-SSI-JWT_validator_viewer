@@ -6,7 +6,6 @@ if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY) {
 }
 
 var fetch = require("node-fetch");
-const didData = require("./did.json");
 const express = require("express");
 const bodyParser = require("body-parser");
 const ngrok = require("ngrok");
@@ -17,23 +16,21 @@ const message = require("uport-transports").message.util;
 const randomstring = require("randomstring");
 var EthrDID = require("ethr-did");
 
-const { success, fail, error } = require("./Utils");
+const { success, error } = require("./Utils");
 
 const nunjucks = require("nunjucks");
 
 const { addEdge, fetchEdges } = require("./Mouro");
 
-import { Resolver } from "did-resolver";
-import { getResolver } from "ethr-did-resolver";
-
 import { verifyCredential } from "did-jwt-vc";
-import { truncateSync } from "fs";
-import { NPN_ENABLED } from "constants";
 
 const app = express();
 
 nunjucks.configure("public", { autoescape: true, express: app });
-const resolver = new Resolver(getResolver());
+
+var did_resolver_1 = require("did-resolver");
+var ethr_did_resolver_1 = require("ethr-did-resolver");
+var resolver = new did_resolver_1.Resolver(ethr_did_resolver_1.getResolver());
 
 let endpoint = null;
 let port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;

@@ -118,7 +118,10 @@ app.get("/api/credential_viewer/:token", function(req, res) {
 			var data = result.payload.vc.credentialSubject;
 
 			const credential = Object.values(data)[0];
-			const credentialPreview = credential["preview"];
+			const credentialPreview = credential["preview"]
+				? credential["preview"]
+				: { fields: [] };
+
 			const credentialData = credential["data"];
 			const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
 				return credentialPreview["fields"].indexOf(b) >=

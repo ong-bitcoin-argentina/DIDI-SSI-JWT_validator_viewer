@@ -5,6 +5,11 @@ if (!process.env.SERVER_DID || !process.env.SERVER_PRIVATE_KEY) {
 	);
 }
 
+const log = console.log;
+console.log = function(data: any) {
+	log(new Date().toISOString() + ": " + data);
+};
+
 var fetch = require("node-fetch");
 const express = require("express");
 const bodyParser = require("body-parser");

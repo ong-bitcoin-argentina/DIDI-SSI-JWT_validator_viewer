@@ -1,4 +1,10 @@
 "use strict";
+
+const log = console.log;
+console.log = function(data) {
+	log(new Date().toISOString() + ": " + data);
+};
+
 var __spreadArrays =
 	(this && this.__spreadArrays) ||
 	function() {

@@ -2,7 +2,9 @@
 
 const log = console.log;
 console.log = function(data) {
-	log(new Date().toISOString() + ": " + data);
+	log(new Date().toISOString() + ": ");
+	log(data);
+	log();
 };
 
 var __spreadArrays =

@@ -156,6 +156,7 @@ app.get("/api/credential_viewer/:token", function(req, res) {
 				credentialData: credentialData,
 				credentialDataKeys: credentialDataKeys,
 				credentialPreview: credentialPreview,
+				status: result.status,
 				error: err ? err : false
 			});
 		},

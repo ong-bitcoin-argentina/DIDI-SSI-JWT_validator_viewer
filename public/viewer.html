@@ -87,7 +87,33 @@
 										{% endif %}
 									</div>
 								</li>
-								{% endfor %}
+								{% endfor %} {% if status %}
+								<li class="list-group-item">
+									<div class="row">
+										<span class="col-4" style="font-weight: bold;">
+											VERIFICADO:
+										</span>
+										<span class="col-8" id="nombre" style="font-weight: bold;">
+											{% if status == "VERIFIED" %}
+											<i
+												style="color:green;margin-top: 5px;margin-left: 5px;"
+												class="fa fa-check"
+												aria-hidden="true"
+											></i>
+											{% endif %} {% if status == "UNVERIFIED" %}
+											<i
+												style="color:red;margin-top: 5px;margin-left: 5px;"
+												class="fa fa-times"
+												aria-hidden="true"
+											></i>
+											<button class="btn btn-primary" type="button" onclick="onVerify()">
+												VERIFICAR
+											</button>
+											{% endif %}
+										</span>
+									</div>
+								</li>
+								{% endif %}
 							</ul>
 							<div id="certificateData"></div>
 						</ul>

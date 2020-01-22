@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"local": "DIDI_API=http://localhost:3000/api/1.0/didi/ SERVER_DID=did:ethr:***REMOVED*** SERVER_PRIVATE_KEY=***REMOVED*** DISABLE_NGROK=true node .",
+		"local": "node ./runLocal.js",
 		"start": "DISABLE_NGROK=true node ."
 	},
 	"author": "",

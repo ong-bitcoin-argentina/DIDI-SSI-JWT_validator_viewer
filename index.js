@@ -123,7 +123,7 @@ const verifyCert = function(cert, cb, errCb) {
 };
 
 app.post("/api/sendVerifyRequest", function(req, res) {
-	const route = process.env.DIDI_API + "verifyCredential";
+	const route = process.env.DIDI_API + "verifyCredentialRequest";
 
 	fetch(route, {
 		method: "POST",

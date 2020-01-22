@@ -122,6 +122,25 @@ const verifyCert = function(cert, cb, errCb) {
 		});
 };
 
+app.post("/api/sendVerifyRequest", function(req, res) {
+	const route = process.env.DIDI_API + "verifyCredential";
+
+	fetch(route, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			did: req.body.did,
+			jwt: req.body.jwt
+		})
+	})
+		.then(_ => {
+			success(res, {});
+		})
+		.catch(err => {
+			console.log(err);
+		});
+});
+
 app.get("/api/credential_viewer/:token", function(req, res) {
 	var jwt = req.params.token;
 	console.log("[credential_viewer]", jwt);
@@ -152,10 +171,14 @@ app.get("/api/credential_viewer/:token", function(req, res) {
 			}
 
 			res.render("viewer.html", {
+				jwt: jwt,
+				did: result.payload.sub,
+
 				iss: result.issuer ? result.issuer : false,
 				credentialData: credentialData,
 				credentialDataKeys: credentialDataKeys,
 				credentialPreview: credentialPreview,
+				status: result.status,
 				error: err ? err : false
 			});
 		},

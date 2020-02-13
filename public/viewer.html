@@ -1,5 +1,8 @@
 <!DOCTYPE html>
+
 <html lang="es">
+	{% for dataElem in data %}
+	</br>
 	<head>
 		<meta charset="utf-8" />
 		<meta
@@ -21,13 +24,13 @@
 
 	<body>
 		<div class="container">
-			{% if error %}
-			<div class="alert alert-danger" role="alert">{{error}}</div>
+			{% if dataElem.error %}
+			<div class="alert alert-danger" role="alert">{{dataElem.error}}</div>
 			{% endif %}
 			<div id="certificado">
 				<div style="display: flex;">
 					<h1 class="display-4 p-3">Certificado</h1>
-					{% if credential === false %}
+					{% if dataElem.credential === false %}
 					<i
 						style="color:red; margin-top: 25px;"
 						class="fa fa-ban fa-3x"
@@ -44,7 +47,7 @@
 				<div class="card mt-2">
 					<div class="card-body">
 						<div class="cart-title text-center">
-							{% if credential !== false %} {% if iss === false %}
+							{% if dataElem.credential !== false %} {% if dataElem.iss === false %}
 							<div style="display: flex;justify-content: center;">
 								<h5 id="issName">Emisor no registrado</h5>
 								<i
@@ -55,7 +58,7 @@
 							</div>
 							{% else %}
 							<div style="display: flex;justify-content: center;">
-								<h5 id="issName">{{iss}}</h5>
+								<h5 id="issName">{{dataElem.iss}}</h5>
 								<i
 									style="color:green;margin-top: 5px;margin-left: 5px;"
 									class="fa fa-check"
@@ -67,48 +70,48 @@
 						</div>
 						<ul class="list-group list-group-flush">
 							<ul>
-								{% for key in credentialDataKeys %}
+								{% for key in dataElem.credentialDataKeys %}
 								<li class="list-group-item">
 									<div class="row">
-										{% if credentialData[key].toPreview %}
+										{% if dataElem.credentialData[key].toPreview %}
 										<span class="col-4" style="font-weight: bold;">
 											{{key}}:
 										</span>
 										<span class="col-8" id="nombre" style="font-weight: bold;">
-											{{credentialData[key].data}}
+											{{dataElem.credentialData[key].data}}
 										</span>
 										{% else %}
 										<span class="col-4">
 											{{key}}:
 										</span>
 										<span class="col-8" id="nombre">
-											{{credentialData[key].data}}
+											{{dataElem.credentialData[key].data}}
 										</span>
 										{% endif %}
 									</div>
 								</li>
-								{% endfor %} {% if status %}
+								{% endfor %} {% if dataElem.status %}
 								<li class="list-group-item">
 									<div class="row">
 										<span class="col-4" style="font-weight: bold;">
 											VERIFICADO:
 										</span>
 										<span class="col-8" id="nombre" style="font-weight: bold;">
-											{% if status == "VERIFIED" %}
+											{% if dataElem.status == "VERIFIED" %}
 											<i
 												style="color:green;margin-top: 5px;margin-left: 5px;"
 												class="fa fa-check"
 												aria-hidden="true"
 											></i>
-											{% endif %} {% if status == "UNVERIFIED" %}
+											{% endif %} {% if dataElem.status == "UNVERIFIED" %}
 											<i
 												style="color:red;margin-top: 5px;margin-left: 5px;"
 												class="fa fa-times"
 												aria-hidden="true"
 											></i>
 
-											<input type="hidden" id="did" value="{{did}}" />
-											<input type="hidden" id="jwt" value="{{jwt}}" />
+											<input type="hidden" id="did" value="{{dataElem.did}}" />
+											<input type="hidden" id="jwt" value="{{dataElem.jwt}}" />
 
 											<button class="btn btn-primary" type="button" onclick="onVerify()">
 												VERIFICAR
@@ -154,4 +157,5 @@
 			}
 		</script>
 	</body>
+	{% endfor %}
 </html>

@@ -94,14 +94,15 @@ app.get("/api/check/:code", function(req, res) {
 	success(res, reply);
 });
 
-const verifyCert = function(cert, cb, errCb) {
+const verifyCert = function(cert, micros, cb, errCb) {
 	const route = process.env.DIDI_API + "issuer/verifyCertificate";
 
 	fetch(route, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({
-			jwt: cert
+			jwt: cert,
+			micros: micros
 		})
 	})
 		.then(response => {
@@ -141,56 +142,77 @@ app.post("/api/sendVerifyRequest", function(req, res) {
 		});
 });
 
-app.get("/api/credential_viewer/:token", function(req, res) {
-	var jwt = req.params.token;
-	console.log("[credential_viewer]", jwt);
+app.get("/api/credential_viewer/:tokens/", async function(req, res) {
+	var jwts = req.params.tokens.split(",");
+	var micros = undefined;
 
-	verifyCert(
-		jwt,
-		function(result, err) {
-			var data = result.payload.vc.credentialSubject;
+	const promises = [];
+	for (let jwt of jwts) {
+		console.log("[credential_viewer]", jwt);
+		const promise = new Promise(function(resolve, reject) {
+			verifyCert(
+				jwt,
+				micros,
+				function(result, err) {
+					var data = result.payload.vc.credentialSubject;
 
-			const credential = Object.values(data)[0];
-			const credentialPreview = credential["preview"]
-				? credential["preview"]
-				: { fields: [] };
+					const credential = Object.values(data)[0];
+					const credentialPreview = credential["preview"]
+						? credential["preview"]
+						: { fields: [] };
 
-			const credentialData = credential["data"];
-			const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
-				return credentialPreview["fields"].indexOf(b) >=
-					credentialPreview["fields"].indexOf(a)
-					? 1
-					: -1;
-			});
+					const credentialData = credential["data"];
+					const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
+						return credentialPreview["fields"].indexOf(b) >=
+							credentialPreview["fields"].indexOf(a)
+							? 1
+							: -1;
+					});
 
-			for (let key of credentialDataKeys) {
-				credentialData[key] = {
-					data: credentialData[key],
-					toPreview: credentialPreview["fields"].indexOf(key) >= 0
-				};
-			}
+					for (let key of credentialDataKeys) {
+						credentialData[key] = {
+							data: credentialData[key],
+							toPreview: credentialPreview["fields"].indexOf(key) >= 0
+						};
+					}
 
-			res.render("viewer.html", {
-				jwt: jwt,
-				did: result.payload.sub,
+					resolve({
+						jwt: jwt,
+						did: result.payload.sub,
+						iss: result.issuer ? result.issuer : false,
+						credentialData: credentialData,
+						credentialDataKeys: credentialDataKeys,
+						credentialPreview: credentialPreview,
+						status: result.status,
+						error: err ? err : false
+					});
+				},
+				function(err) {
+					resolve({
+						iss: false,
+						credential: false,
+						error: err.message
+					});
+				}
+			);
+		});
+		promises.push(promise);
+	}
 
-				iss: result.issuer ? result.issuer : false,
-				credentialData: credentialData,
-				credentialDataKeys: credentialDataKeys,
-				credentialPreview: credentialPreview,
-				status: result.status,
-				error: err ? err : false
-			});
-		},
-		function(err) {
-			return res.render("viewer.html", {
-				iss: false,
-				credential: false,
-				error: err.message
-			});
-		}
-	);
+	try {
+		const result = await Promise.all(promises);
+		res.render("viewer.html", {
+			data: result
+		});
+	} catch (err) {
+		return res.render("viewer.html", {
+			iss: false,
+			credential: false,
+			error: err.message
+		});
+	}
 });
+
 app.post("/api/callback/:code", function(req, res) {
 	var code = req.params.code;
 	var jwt = req.body.access_token;

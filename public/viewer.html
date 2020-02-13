@@ -110,10 +110,7 @@
 												aria-hidden="true"
 											></i>
 
-											<input type="hidden" id="did" value="{{dataElem.did}}" />
-											<input type="hidden" id="jwt" value="{{dataElem.jwt}}" />
-
-											<button class="btn btn-primary" type="button" onclick="onVerify()">
+											<button class="btn btn-primary" type="button" onclick="onVerify('{{dataElem.jwt}}','{{dataElem.did}}')">
 												VERIFICAR
 											</button>
 
@@ -134,28 +131,27 @@
 				</div>
 			</div>
 		</div>
-		<script
-			src="http://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
-			type="text/javascript"
-		></script>
-		<script>
-			function onVerify() {
-				var jwt = $("#jwt").val();
-				var did = $("#did").val();
-				$.post({
-					url: "/api/sendVerifyRequest",
-					headers: { "Content-Type": "application/json" },
-					data: JSON.stringify({
-						did: did,
-						jwt: jwt
-					}),
-					success: () => {
-						console.log("success");
-						location.reload();
-					}
-				});
-			}
-		</script>
 	</body>
 	{% endfor %}
+
+	<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+	type="text/javascript"
+	></script>
+	<script>
+		function onVerify(jwt, did) {
+			$.post({
+				url: "/api/sendVerifyRequest",
+				headers: { "Content-Type": "application/json" },
+				data: JSON.stringify({
+					did: did,
+					jwt: jwt
+				}),
+				success: () => {
+					console.log("success");
+					location.reload();
+				}
+			});
+		}
+	</script>
 </html>

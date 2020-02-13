@@ -185,6 +185,25 @@ app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 	}
 });
 
+app.post("/api/sendVerifyRequest", function(req, res) {
+	const route = process.env.DIDI_API + "verifyCredentialRequest";
+
+	fetch(route, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			did: req.body.did,
+			jwt: req.body.jwt
+		})
+	})
+		.then(_ => {
+			success(res, {});
+		})
+		.catch(err => {
+			console.log(err);
+		});
+});
+
 app.post("/api/callback/:code", (req, res) => {
 	const code = req.params.code;
 	const jwt = req.body.access_token;

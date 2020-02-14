@@ -94,6 +94,30 @@ app.get("/api/check/:code", function(req, res) {
 	success(res, reply);
 });
 
+const getCerts = function(did, hashes, cb, errCb) {
+	const route = process.env.DIDI_API + "issuer/getCertificates";
+
+	fetch(route, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			did: did,
+			hashes: hashes
+		})
+	})
+		.then(response => {
+			return response.json();
+		})
+		.then(res => {
+			if (res.status === "error") return errCb(res);
+			return cb(res.data);
+		})
+		.catch(err => {
+			console.log(err);
+			return errCb(err);
+		});
+};
+
 const verifyCert = function(cert, micros, cb, errCb) {
 	const route = process.env.DIDI_API + "issuer/verifyCertificate";
 
@@ -142,64 +166,76 @@ app.post("/api/sendVerifyRequest", function(req, res) {
 		});
 });
 
-app.get("/api/credential_viewer/:tokens/", async function(req, res) {
-	var jwts = req.params.tokens.split(",");
-	var micros = undefined;
+app.get("/api/credential_viewer/:did/:tokens/", async function(req, res) {
+	var did = req.params.did;
+	var hashes = req.params.tokens;
 
-	const promises = [];
-	for (let jwt of jwts) {
-		console.log("[credential_viewer]", jwt);
-		const promise = new Promise(function(resolve, reject) {
-			verifyCert(
-				jwt,
-				micros,
-				function(result, err) {
-					var data = result.payload.vc.credentialSubject;
-
-					const credential = Object.values(data)[0];
-					const credentialPreview = credential["preview"]
-						? credential["preview"]
-						: { fields: [] };
-
-					const credentialData = credential["data"];
-					const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
-						return credentialPreview["fields"].indexOf(b) >=
-							credentialPreview["fields"].indexOf(a)
-							? 1
-							: -1;
-					});
-
-					for (let key of credentialDataKeys) {
-						credentialData[key] = {
-							data: credentialData[key],
-							toPreview: credentialPreview["fields"].indexOf(key) >= 0
-						};
-					}
-
-					resolve({
-						jwt: jwt,
-						did: result.payload.sub,
-						iss: result.issuer ? result.issuer : false,
-						credentialData: credentialData,
-						credentialDataKeys: credentialDataKeys,
-						credentialPreview: credentialPreview,
-						status: result.status,
-						error: err ? err : false
-					});
+	try {
+		const jwts = await new Promise(function(resolve, reject) {
+			getCerts(
+				did,
+				hashes,
+				function(result) {
+					resolve(result.filter(res => res !== null));
 				},
 				function(err) {
-					resolve({
-						iss: false,
-						credential: false,
-						error: err.message
-					});
+					reject(err);
 				}
 			);
 		});
-		promises.push(promise);
-	}
 
-	try {
+		const promises = [];
+		for (let jwt of jwts) {
+			const promise = new Promise(function(resolve, reject) {
+				verifyCert(
+					jwt,
+					undefined,
+					function(result, err) {
+						var data = result.payload.vc.credentialSubject;
+
+						const credential = Object.values(data)[0];
+						const credentialPreview = credential["preview"]
+							? credential["preview"]
+							: { fields: [] };
+
+						const credentialData = credential["data"];
+						const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
+							return credentialPreview["fields"].indexOf(b) >=
+								credentialPreview["fields"].indexOf(a)
+								? 1
+								: -1;
+						});
+
+						for (let key of credentialDataKeys) {
+							credentialData[key] = {
+								data: credentialData[key],
+								toPreview: credentialPreview["fields"].indexOf(key) >= 0
+							};
+						}
+
+						resolve({
+							jwt: jwt,
+							did: result.payload.sub,
+							iss: result.issuer ? result.issuer : false,
+							credentialData: credentialData,
+							credentialDataKeys: credentialDataKeys,
+							credentialPreview: credentialPreview,
+							status: result.status,
+							error: err ? err : false
+						});
+					},
+					function(err) {
+						resolve({
+							iss: false,
+							credential: false,
+							error: err.message
+						});
+					}
+				);
+			});
+			promises.push(promise);
+		}
+
 		const result = await Promise.all(promises);
 		res.render("viewer.html", {
 			data: result

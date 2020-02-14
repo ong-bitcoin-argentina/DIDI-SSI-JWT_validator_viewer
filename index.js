@@ -123,6 +123,10 @@ const verifyCert = function(cert, micros, cb, errCb) {
 		});
 };
 
+/**
+ * Envia al didi-server un pedido para realizar un disclosureRequest
+ * al dueño del certificado para que valide que es suyo y los datos que contiene son correctos
+ */
 app.post("/api/sendVerifyRequest", function(req, res) {
 	const route = process.env.DIDI_API + "verifyCredentialRequest";
 
@@ -142,6 +146,10 @@ app.post("/api/sendVerifyRequest", function(req, res) {
 		});
 });
 
+/**
+ * Envia al didi-server los certificados para ser validados y
+ * muestra el contenido de cada uno de ellos y/o el error que este retorna
+ */
 app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 	var jwts = req.params.tokens.split(",");
 	var micros = undefined;

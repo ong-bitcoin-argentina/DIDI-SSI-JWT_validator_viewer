@@ -114,6 +114,33 @@ const verifyCert = function(cert, micros, cb, errCb) {
 		});
 };
 
+/**
+ * Envia al didi-server un pedido para realizar un disclosureRequest
+ * al dueño del certificado para que valide que es suyo y los datos que contiene son correctos
+ */
+app.post("/api/sendVerifyRequest", function(req, res) {
+	const route = process.env.DIDI_API + "verifyCredentialRequest";
+
+	fetch(route, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			did: req.body.did,
+			jwt: req.body.jwt
+		})
+	})
+		.then(_ => {
+			success(res, {});
+		})
+		.catch(err => {
+			console.log(err);
+		});
+});
+
+/**
+ * Envia al didi-server los certificados para ser validados y
+ * muestra el contenido de cada uno de ellos y/o el error que este retorna
+ */
 app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 	var jwts = req.params.tokens.split(",");
 	var micros = undefined;
@@ -183,25 +210,6 @@ app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 			error: err.message
 		});
 	}
-});
-
-app.post("/api/sendVerifyRequest", function(req, res) {
-	const route = process.env.DIDI_API + "verifyCredentialRequest";
-
-	fetch(route, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			did: req.body.did,
-			jwt: req.body.jwt
-		})
-	})
-		.then(_ => {
-			success(res, {});
-		})
-		.catch(err => {
-			console.log(err);
-		});
 });
 
 app.post("/api/callback/:code", (req, res) => {

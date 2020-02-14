@@ -85,14 +85,15 @@ app.get("/api/check/:code", (req, res) => {
 	success(res, reply);
 });
 
-const verifyCert = function(cert, cb, errCb) {
+const verifyCert = function(cert, micros, cb, errCb) {
 	const route = process.env.DIDI_API + "issuer/verifyCertificate";
 
 	fetch(route, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({
-			jwt: cert
+			jwt: cert,
+			micros: micros
 		})
 	})
 		.then(response => {
@@ -113,51 +114,94 @@ const verifyCert = function(cert, cb, errCb) {
 		});
 };
 
-app.get("/api/credential_viewer/:token", function(req, res) {
-	var jwt = req.params.token;
-	console.log("[credential_viewer]", jwt);
+app.get("/api/credential_viewer/:tokens/", async function(req, res) {
+	var jwts = req.params.tokens.split(",");
+	var micros = undefined;
 
-	verifyCert(
-		jwt,
-		function(result, err) {
-			var data = result.payload.vc.credentialSubject;
+	const promises = [];
+	for (let jwt of jwts) {
+		console.log("[credential_viewer]", jwt);
+		const promise = new Promise(function(resolve, reject) {
+			verifyCert(
+				jwt,
+				micros,
+				function(result, err) {
+					var data = result.payload.vc.credentialSubject;
 
-			const credential = Object.values(data)[0];
-			const credentialPreview = credential["preview"]
-				? credential["preview"]
-				: { fields: [] };
+					const credential = Object.values(data)[0];
+					const credentialPreview = credential["preview"]
+						? credential["preview"]
+						: { fields: [] };
 
-			const credentialData = credential["data"];
-			const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
-				return credentialPreview["fields"].indexOf(b) >=
-					credentialPreview["fields"].indexOf(a)
-					? 1
-					: -1;
-			});
+					const credentialData = credential["data"];
+					const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
+						return credentialPreview["fields"].indexOf(b) >=
+							credentialPreview["fields"].indexOf(a)
+							? 1
+							: -1;
+					});
 
-			for (let key of credentialDataKeys) {
-				credentialData[key] = {
-					data: credentialData[key],
-					toPreview: credentialPreview["fields"].indexOf(key) >= 0
-				};
-			}
+					for (let key of credentialDataKeys) {
+						credentialData[key] = {
+							data: credentialData[key],
+							toPreview: credentialPreview["fields"].indexOf(key) >= 0
+						};
+					}
 
-			res.render("viewer.html", {
-				iss: result.issuer ? result.issuer : false,
-				credentialData: credentialData,
-				credentialDataKeys: credentialDataKeys,
-				credentialPreview: credentialPreview,
-				error: err ? err : false
-			});
-		},
-		function(err) {
-			return res.render("viewer.html", {
-				iss: false,
-				credential: false,
-				error: err.message
-			});
-		}
-	);
+					resolve({
+						jwt: jwt,
+						did: result.payload.sub,
+						iss: result.issuer ? result.issuer : false,
+						credentialData: credentialData,
+						credentialDataKeys: credentialDataKeys,
+						credentialPreview: credentialPreview,
+						status: result.status,
+						error: err ? err : false
+					});
+				},
+				function(err) {
+					resolve({
+						iss: false,
+						credential: false,
+						error: err.message
+					});
+				}
+			);
+		});
+		promises.push(promise);
+	}
+
+	try {
+		const result = await Promise.all(promises);
+		res.render("viewer.html", {
+			data: result
+		});
+	} catch (err) {
+		return res.render("viewer.html", {
+			iss: false,
+			credential: false,
+			error: err.message
+		});
+	}
+});
+
+app.post("/api/sendVerifyRequest", function(req, res) {
+	const route = process.env.DIDI_API + "verifyCredentialRequest";
+
+	fetch(route, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			did: req.body.did,
+			jwt: req.body.jwt
+		})
+	})
+		.then(_ => {
+			success(res, {});
+		})
+		.catch(err => {
+			console.log(err);
+		});
 });
 
 app.post("/api/callback/:code", (req, res) => {

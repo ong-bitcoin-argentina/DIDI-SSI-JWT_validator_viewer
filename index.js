@@ -12,10 +12,10 @@ exports.__esModule = true;
 var fetch = require("node-fetch");
 var express = require("express");
 var bodyParser = require("body-parser");
-var ngrok = require("ngrok");
 var nunjucks = require("nunjucks");
 var app = express();
 nunjucks.configure("public", { autoescape: true, express: app });
+
 var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 app.use(bodyParser.json());
 

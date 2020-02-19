@@ -53,7 +53,7 @@ const verifyCert = function(cert, micros, cb, errCb) {
  * Envia al didi-server un pedido para realizar un disclosureRequest
  * al dueño del certificado para que valide que es suyo y los datos que contiene son correctos
  */
-app.post("/api/sendVerifyRequest", function(req, res) {
+app.post("/api/credential_viewer/sendVerifyRequest", function(req, res) {
 	const route = process.env.DIDI_API + "verifyCredentialRequest";
 
 	fetch(route, {
@@ -116,7 +116,6 @@ app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 						iss: result.issuer ? result.issuer : false,
 						credentialData: credentialData,
 						credentialDataKeys: credentialDataKeys,
-						credentialPreview: credentialPreview,
 						status: result.status,
 						error: err ? err : false
 					});

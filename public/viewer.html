@@ -141,7 +141,7 @@
 	<script>
 		function onVerify(jwt, did) {
 			$.post({
-				url: "/api/credential_viewer/credential_viewer/sendVerifyRequest",
+				url: "/api/credential_viewer/sendVerifyRequest",
 				headers: { "Content-Type": "application/json" },
 				data: JSON.stringify({
 					did: did,

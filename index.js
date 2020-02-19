@@ -9,6 +9,9 @@ console.log = function(data) {
 
 exports.__esModule = true;
 
+var _a = require("./Utils"),
+	success = _a.success;
+
 var fetch = require("node-fetch");
 var express = require("express");
 var bodyParser = require("body-parser");

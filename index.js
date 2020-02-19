@@ -86,7 +86,7 @@ app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 
 	const promises = [];
 	for (let jwt of jwts) {
-		console.log("[credential_viewer]", jwt);
+		console.log(jwt);
 		const promise = new Promise(function(resolve, reject) {
 			verifyCert(
 				jwt,

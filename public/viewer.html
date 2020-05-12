@@ -110,7 +110,7 @@
 												aria-hidden="true"
 											></i>
 
-											<button class="btn btn-primary" type="button" onclick="onVerify('{{dataElem.jwt}}','{{dataElem.did}}')">
+											<button id="verify" class="btn btn-primary" type="button" onclick="onVerify('{{dataElem.jwt}}','{{dataElem.did}}')">
 												VERIFICAR
 											</button>
 
@@ -140,6 +140,8 @@
 	></script>
 	<script>
 		function onVerify(jwt, did) {
+			$("#verify").attr("disabled", true);
+
 			$.post({
 				url: "/api/credential_viewer/sendVerifyRequest",
 				headers: { "Content-Type": "application/json" },
@@ -147,7 +149,8 @@
 					did: did,
 					jwt: jwt
 				}),
-				success: () => {
+				success: () => {		
+					confirm("Pedido de verificacion enviado");			
 					console.log("success");
 					//location.reload();
 				}

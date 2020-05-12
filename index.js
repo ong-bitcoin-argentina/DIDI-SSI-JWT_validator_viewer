@@ -1,7 +1,7 @@
 "use strict";
 
 const log = console.log;
-console.log = function(data) {
+console.log = function (data) {
 	log(new Date().toISOString() + ": ");
 	log(data);
 	log();
@@ -27,7 +27,7 @@ app.use("/", express.static(__dirname + "/public"));
 /**
  * Verifica certificado en didi-server
  */
-const verifyCert = function(cert, micros, cb, errCb) {
+const verifyCert = function (cert, micros, cb, errCb) {
 	const route = process.env.DIDI_API + "issuer/verifyCertificate";
 
 	fetch(route, {
@@ -35,13 +35,13 @@ const verifyCert = function(cert, micros, cb, errCb) {
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({
 			jwt: cert,
-			micros: micros
-		})
+			micros: micros,
+		}),
 	})
-		.then(response => {
+		.then((response) => {
 			return response.json();
 		})
-		.then(res => {
+		.then((res) => {
 			if (res.status === "error") return errCb(res);
 
 			if (res.data.err) {
@@ -50,7 +50,7 @@ const verifyCert = function(cert, micros, cb, errCb) {
 				return cb(res.data);
 			}
 		})
-		.catch(err => {
+		.catch((err) => {
 			console.log(err);
 			return errCb(err);
 		});
@@ -60,7 +60,7 @@ const verifyCert = function(cert, micros, cb, errCb) {
  * Envia al didi-server un pedido para realizar un disclosureRequest
  * al dueño del certificado para que valide que es suyo y los datos que contiene son correctos
  */
-app.post("/api/credential_viewer/sendVerifyRequest", function(req, res) {
+app.post("/api/credential_viewer/sendVerifyRequest", function (req, res) {
 	const route = process.env.DIDI_API + "verifyCredentialRequest";
 
 	fetch(route, {
@@ -68,13 +68,13 @@ app.post("/api/credential_viewer/sendVerifyRequest", function(req, res) {
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({
 			did: req.body.did,
-			jwt: req.body.jwt
-		})
+			jwt: req.body.jwt,
+		}),
 	})
-		.then(_ => {
+		.then((_) => {
 			success(res, {});
 		})
-		.catch(err => {
+		.catch((err) => {
 			console.log(err);
 		});
 });
@@ -83,18 +83,18 @@ app.post("/api/credential_viewer/sendVerifyRequest", function(req, res) {
  * Envia al didi-server los certificados para ser validados y
  * muestra el contenido de cada uno de ellos y/o el error que este retorna
  */
-app.get("/api/credential_viewer/:tokens/", async function(req, res) {
+app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 	var jwts = req.params.tokens.split(",");
 	var micros = undefined;
 
 	const promises = [];
 	for (let jwt of jwts) {
 		console.log(jwt);
-		const promise = new Promise(function(resolve, reject) {
+		const promise = new Promise(function (resolve, reject) {
 			verifyCert(
 				jwt,
 				micros,
-				function(result, err) {
+				function (result, err) {
 					var data = result.payload.vc.credentialSubject;
 
 					const credential = Object.values(data)[0];
@@ -113,7 +113,7 @@ app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 					for (let key of credentialDataKeys) {
 						credentialData[key] = {
 							data: credentialData[key],
-							toPreview: credentialPreview["fields"].indexOf(key) >= 0
+							toPreview: credentialPreview["fields"].indexOf(key) >= 0,
 						};
 					}
 
@@ -124,14 +124,14 @@ app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 						credentialData: credentialData,
 						credentialDataKeys: credentialDataKeys,
 						status: result.status,
-						error: err ? err : false
+						error: err ? err : false,
 					});
 				},
-				function(err) {
+				function (err) {
 					resolve({
 						iss: false,
 						credential: false,
-						error: err.message
+						error: err.message,
 					});
 				}
 			);
@@ -142,17 +142,17 @@ app.get("/api/credential_viewer/:tokens/", async function(req, res) {
 	try {
 		const result = await Promise.all(promises);
 		res.render("viewer.html", {
-			data: result
+			data: result,
 		});
 	} catch (err) {
 		return res.render("viewer.html", {
 			iss: false,
 			credential: false,
-			error: err.message
+			error: err.message,
 		});
 	}
 });
 
-app.listen(port, function() {
+app.listen(port, function () {
 	console.log("Verification Service running", port);
 });

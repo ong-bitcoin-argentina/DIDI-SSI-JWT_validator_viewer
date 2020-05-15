@@ -104,7 +104,7 @@
 												aria-hidden="true"
 											></i>
 											{% endif %} {% if dataElem.status == "UNVERIFIED" %}
-											<meta id="refresh" http-equiv="refresh" disabled="true" content="40">
+											<meta id="refresh" http-equiv="refresh" disabled="true" content="99999999999">
 											<i
 												style="color:red;margin-top: 5px;margin-left: 5px;"
 												class="fa fa-times"
@@ -145,16 +145,17 @@
 			var reloading = sessionStorage.getItem("reloading");
 			if (reloading) {
 				var time = Number(sessionStorage.getItem("time"));
+				console.log("time:" + Number(time) );
+				console.log(time > 60*10);
 				if(time > 60*10) {
 					confirm("Se detendra el refresco por haber pasado 10 minutos desde el envio del pedido.");
 					console.log("too many refreshes");
 					$("#verify").attr("disabled", true);
-					$("#refresh").attr("disabled", false);
+					$("#refresh").attr("content", 99999999999);
 				} else {
-					console.log("next refresh:" + Number(time + 40) );
 					$("#verify").attr("disabled", true);
-					$("#refresh").attr("disabled", false);
-					sessionStorage.setItem("time", time + 40);
+					$("#refresh").attr("content", 40);
+					sessionStorage.setItem("time",  Number(time) + 40);
 				}
 
 			} else {
@@ -180,7 +181,7 @@
 					console.log("success");
 
 					sessionStorage.setItem("reloading", "true");
-					$("#refresh").attr("disabled", false);
+					$("#refresh").attr("content", 40);
 				}
 			});
 		}

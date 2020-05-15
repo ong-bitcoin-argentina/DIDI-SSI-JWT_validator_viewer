@@ -104,6 +104,7 @@
 												aria-hidden="true"
 											></i>
 											{% endif %} {% if dataElem.status == "UNVERIFIED" %}
+											<meta id="refresh" http-equiv="refresh" disabled="true" content="40">
 											<i
 												style="color:red;margin-top: 5px;margin-left: 5px;"
 												class="fa fa-times"
@@ -139,6 +140,31 @@
 	type="text/javascript"
 	></script>
 	<script>
+
+		window.onload = function() {
+			var reloading = sessionStorage.getItem("reloading");
+			if (reloading) {
+				var time = Number(sessionStorage.getItem("time"));
+				if(time > 60*10) {
+					confirm("Se detendra el refresco por haber pasado 10 minutos desde el envio del pedido.");
+					console.log("too many refreshes");
+					$("#verify").attr("disabled", true);
+					$("#refresh").attr("disabled", false);
+				} else {
+					console.log("next refresh:" + Number(time + 40) );
+					$("#verify").attr("disabled", true);
+					$("#refresh").attr("disabled", false);
+					sessionStorage.setItem("time", time + 40);
+				}
+
+			} else {
+				console.log("startup");
+				sessionStorage.setItem("time", 0);
+				$("#verify").attr("disabled", false);
+				$("#refresh").attr("disabled", true);
+			}
+		}
+
 		function onVerify(jwt, did) {
 			$("#verify").attr("disabled", true);
 
@@ -152,7 +178,9 @@
 				success: () => {		
 					confirm("Pedido de verificacion enviado");			
 					console.log("success");
-					//location.reload();
+
+					sessionStorage.setItem("reloading", "true");
+					$("#refresh").attr("disabled", false);
 				}
 			});
 		}

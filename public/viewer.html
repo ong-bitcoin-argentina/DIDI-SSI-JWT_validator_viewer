@@ -9,7 +9,7 @@
 			name="viewport"
 			content="width=device-width, initial-scale=1, shrink-to-fit=no"
 		/>
-		<title>Certificado</title>
+		<title>Credenciales</title>
 		<link
 			rel="stylesheet"
 			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -27,9 +27,9 @@
 			{% if dataElem.error %}
 			<div class="alert alert-danger" role="alert">{{dataElem.error}}</div>
 			{% endif %}
-			<div id="certificado">
+			<div id="credencial">
 				<div style="display: flex;">
-					<h1 class="display-4 p-3">Certificado</h1>
+					<h1 class="display-4 p-3">Credenciales</h1>
 					{% if dataElem.credential === false %}
 					<i
 						style="color:red; margin-top: 25px;"

@@ -84,6 +84,26 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 	var jwts = req.params.tokens.split(",");
 	var micros = undefined;
 
+	const translations = {
+		streetAddress: "calle",
+		numberStreet: "número",
+		floor: "piso",
+		department: "departamento",
+		zipCode: "código zip",
+		city: "ciudad",
+		municipality: "municipalidad",
+		province: "provincia",
+		country: "país",
+		gender: "genero",
+		names: "nombres",
+		lastNames: "apellidos",
+		birthdate: "cumpleaños",
+		nationality: "nacionalidad",
+		countryBirth: "país de origen",
+		phoneNumber: "telefóno",
+		email: "mail",
+	};
+
 	const promises = [];
 	for (let jwt of jwts) {
 		console.log(jwt);
@@ -107,8 +127,11 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 							: -1;
 					});
 
+					const keys = [];
 					for (let key of credentialDataKeys) {
-						credentialData[key] = {
+						const newKey = translations[key] ? translations[key] : key;
+						keys.push(newKey);
+						credentialData[newKey] = {
 							data: credentialData[key],
 							toPreview: credentialPreview["fields"].indexOf(key) >= 0,
 						};
@@ -119,7 +142,7 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 						did: result.payload.sub,
 						iss: result.issuer ? result.issuer : false,
 						credentialData: credentialData,
-						credentialDataKeys: credentialDataKeys,
+						credentialDataKeys: keys,
 						status: result.status,
 						error: err ? err : false,
 					});

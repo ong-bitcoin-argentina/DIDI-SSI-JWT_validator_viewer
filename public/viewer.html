@@ -9,7 +9,7 @@
 			name="viewport"
 			content="width=device-width, initial-scale=1, shrink-to-fit=no"
 		/>
-		<title>Certificado</title>
+		<title>Credenciales</title>
 		<link
 			rel="stylesheet"
 			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -27,9 +27,9 @@
 			{% if dataElem.error %}
 			<div class="alert alert-danger" role="alert">{{dataElem.error}}</div>
 			{% endif %}
-			<div id="certificado">
+			<div id="credencial">
 				<div style="display: flex;">
-					<h1 class="display-4 p-3">Certificado</h1>
+					<h1 class="display-4 p-3">Credenciales</h1>
 					{% if dataElem.credential === false %}
 					<i
 						style="color:red; margin-top: 25px;"
@@ -104,6 +104,7 @@
 												aria-hidden="true"
 											></i>
 											{% endif %} {% if dataElem.status == "UNVERIFIED" %}
+											<meta id="refresh" http-equiv="refresh" disabled="true" content="99999999999">
 											<i
 												style="color:red;margin-top: 5px;margin-left: 5px;"
 												class="fa fa-times"
@@ -139,6 +140,32 @@
 	type="text/javascript"
 	></script>
 	<script>
+
+		window.onload = function() {
+			var reloading = sessionStorage.getItem("reloading");
+			if (reloading) {
+				var time = Number(sessionStorage.getItem("time"));
+				console.log("time:" + Number(time) );
+				console.log(time > 60*10);
+				if(time > 60*10) {
+					confirm("Se detendra el refresco por haber pasado 10 minutos desde el envio del pedido.");
+					console.log("too many refreshes");
+					$("#verify").attr("disabled", true);
+					$("#refresh").attr("content", 99999999999);
+				} else {
+					$("#verify").attr("disabled", true);
+					$("#refresh").attr("content", 40);
+					sessionStorage.setItem("time",  Number(time) + 40);
+				}
+
+			} else {
+				console.log("startup");
+				sessionStorage.setItem("time", 0);
+				$("#verify").attr("disabled", false);
+				$("#refresh").attr("disabled", true);
+			}
+		}
+
 		function onVerify(jwt, did) {
 			$("#verify").attr("disabled", true);
 
@@ -152,7 +179,9 @@
 				success: () => {		
 					confirm("Pedido de verificacion enviado");			
 					console.log("success");
-					//location.reload();
+
+					sessionStorage.setItem("reloading", "true");
+					$("#refresh").attr("content", 40);
 				}
 			});
 		}

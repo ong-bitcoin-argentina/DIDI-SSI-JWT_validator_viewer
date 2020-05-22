@@ -58,7 +58,7 @@ const verifyCert = function (cert, micros, cb, errCb) {
 
 /**
  * Envia al didi-server un pedido para realizar un disclosureRequest
- * al dueño del certificado para que valide que es suyo y los datos que contiene son correctos
+ * al dueño del credencial para que valide que es suyo y los datos que contiene son correctos
  */
 app.post("/api/credential_viewer/sendVerifyRequest", function (req, res) {
 	const route = process.env.DIDI_API + "verifyCredentialRequest";
@@ -80,7 +80,7 @@ app.post("/api/credential_viewer/sendVerifyRequest", function (req, res) {
 });
 
 /**
- * Envia al didi-server los certificados para ser validados y
+ * Envia al didi-server los credenciales para ser validados y
  * muestra el contenido de cada uno de ellos y/o el error que este retorna
  */
 app.get("/api/credential_viewer/:tokens/", async function (req, res) {
@@ -110,9 +110,14 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 							: -1;
 					});
 
+					console.log(data);
+
+					const keys = [];
 					for (let key of credentialDataKeys) {
-						credentialData[key] = {
-							data: credentialData[key],
+						const newKey = translateName(key);
+						keys.push(newKey);
+						credentialData[newKey] = {
+							data: translateField(credentialData[key]),
 							toPreview: credentialPreview["fields"].indexOf(key) >= 0,
 						};
 					}
@@ -122,7 +127,7 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 						did: result.payload.sub,
 						iss: result.issuer ? result.issuer : false,
 						credentialData: credentialData,
-						credentialDataKeys: credentialDataKeys,
+						credentialDataKeys: keys,
 						status: result.status,
 						error: err ? err : false,
 					});
@@ -152,6 +157,78 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 		});
 	}
 });
+
+const translateName = function (name) {
+	const translations = {
+		streetAddress: "Calle",
+		countryBirth: "País de nacimiento",
+		numberStreet: "Número de calle",
+		floor: "Piso",
+		department: "Departmento",
+		zipCode: "Código Zip",
+		municipality: "Municipalidad",
+		city: "Ciudad",
+		province: "Provincia",
+		country: "País",
+		dni: "Dni",
+		gender: "Genero",
+		names: "Nombres",
+		lastNames: "Apellidos",
+		birthdate: "Cumpleaños",
+		cuil: "Cuil",
+		messageOfDeath: "Mensaje de difunto",
+		nationality: "Nacionalidad",
+		phoneNumber: "Número de teléfono",
+		email: "Mail",
+	};
+
+	return translations[name] ? translations[name] : name;
+};
+
+const translateField = function (data) {
+	const dateRegex = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)/;
+	if (data.match(dateRegex)) {
+		const date = new Date(data);
+		return formatFullDate(date);
+	}
+
+	if (data === "true" || data === "false") {
+		return data === "true" ? "si" : "no";
+	} else {
+		return data;
+	}
+};
+
+const formatDatePart = function (date) {
+	const months = [
+		"Enero",
+		"Febrero",
+		"Marzo",
+		"Abril",
+		"Mayo",
+		"Junio",
+		"Julio",
+		"Agosto",
+		"Septiembre",
+		"Octubre",
+		"Noviembre",
+		"Diciembre",
+	];
+	return `${date.getDay()} de ${
+		months[date.getMonth()]
+	} de ${date.getFullYear()}`;
+};
+
+const formatHourPart = function (date) {
+	const pad = (n) => (n < 10 ? `0${n}` : n);
+	return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+		date.getSeconds()
+	)}`;
+};
+
+const formatFullDate = function (date) {
+	return `${formatDatePart(date)}, ${formatHourPart(date)}`;
+};
 
 app.listen(port, function () {
 	console.log("Verification Service running", port);

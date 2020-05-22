@@ -84,26 +84,6 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 	var jwts = req.params.tokens.split(",");
 	var micros = undefined;
 
-	const translations = {
-		streetAddress: "calle",
-		numberStreet: "número",
-		floor: "piso",
-		department: "departamento",
-		zipCode: "código zip",
-		city: "ciudad",
-		municipality: "municipalidad",
-		province: "provincia",
-		country: "país",
-		gender: "genero",
-		names: "nombres",
-		lastNames: "apellidos",
-		birthdate: "cumpleaños",
-		nationality: "nacionalidad",
-		countryBirth: "país de origen",
-		phoneNumber: "telefóno",
-		email: "mail",
-	};
-
 	const promises = [];
 	for (let jwt of jwts) {
 		console.log(jwt);
@@ -131,7 +111,7 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 
 					const keys = [];
 					for (let key of credentialDataKeys) {
-						const newKey = translations[key] ? translations[key] : key;
+						const newKey = translateName(key);
 						keys.push(newKey);
 						credentialData[newKey] = {
 							data: translateField(credentialData[key]),
@@ -175,6 +155,33 @@ app.get("/api/credential_viewer/:tokens/", async function (req, res) {
 	}
 });
 
+const translateName = function (name) {
+	const translations = {
+		streetAddress: "Calle",
+		countryBirth: "País de nacimiento",
+		numberStreet: "Número de calle",
+		floor: "Piso",
+		department: "Departmento",
+		zipCode: "Código Zip",
+		municipality: "Municipalidad",
+		city: "Ciudad",
+		province: "Provincia",
+		country: "País",
+		dni: "Dni",
+		gender: "Genero",
+		names: "Nombres",
+		lastNames: "Apellidos",
+		birthdate: "Cumpleaños",
+		cuil: "Cuil",
+		messageOfDeath: "Mensaje de difunto",
+		nationality: "Nacionalidad",
+		phoneNumber: "Número de teléfono",
+		email: "Mail",
+	};
+
+	return translations[name] ? translations[name] : name;
+};
+
 const translateField = function (data) {
 	const dateRegex = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)/;
 	if (data.match(dateRegex)) {
@@ -189,7 +196,7 @@ const translateField = function (data) {
 	}
 };
 
-const formatDatePart = function(date) {
+const formatDatePart = function (date) {
 	const months = [
 		"Enero",
 		"Febrero",
@@ -202,19 +209,23 @@ const formatDatePart = function(date) {
 		"Septiembre",
 		"Octubre",
 		"Noviembre",
-		"Diciembre"
+		"Diciembre",
 	];
-	return `${date.getDay()} de ${months[date.getMonth()]} de ${date.getFullYear()}`;
-}
+	return `${date.getDay()} de ${
+		months[date.getMonth()]
+	} de ${date.getFullYear()}`;
+};
 
-const formatHourPart = function(date) {
+const formatHourPart = function (date) {
 	const pad = (n) => (n < 10 ? `0${n}` : n);
-	return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
+	return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+		date.getSeconds()
+	)}`;
+};
 
-const formatFullDate = function(date) {
+const formatFullDate = function (date) {
 	return `${formatDatePart(date)}, ${formatHourPart(date)}`;
-}
+};
 
 app.listen(port, function () {
 	console.log("Verification Service running", port);

@@ -9,18 +9,17 @@ console.log = function (data) {
 
 exports.__esModule = true;
 
-var _a = require("./Utils"),
+const _a = require("./Utils"),
 	success = _a.success;
 
-var fetch = require("node-fetch");
-var express = require("express");
-var bodyParser = require("body-parser");
-var nunjucks = require("nunjucks");
-var app = express();
+const fetch = require("node-fetch");
+const express = require("express");
+const nunjucks = require("nunjucks");
+const app = express();
 nunjucks.configure("public", { autoescape: true, express: app });
 
-var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
-app.use(bodyParser.json());
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
+app.use(express.json());
 
 app.use("/", express.static(__dirname + "/public"));
 
@@ -28,7 +27,7 @@ app.use("/", express.static(__dirname + "/public"));
  * Verifica certificado en didi-server
  */
 const verifyCert = function (cert, micros, cb, errCb) {
-	const route = process.env.DIDI_API + "issuer/verifyCertificate";
+	const route = process.env.DIDI_API + "/issuer/verifyCertificate";
 
 	fetch(route, {
 		method: "POST",
@@ -61,7 +60,7 @@ const verifyCert = function (cert, micros, cb, errCb) {
  * al dueño del credencial para que valide que es suyo y los datos que contiene son correctos
  */
 app.post("/api/credential_viewer/sendVerifyRequest", function (req, res) {
-	const route = process.env.DIDI_API + "verifyCredentialRequest";
+	const route = process.env.DIDI_API + "/verifyCredentialRequest";
 
 	fetch(route, {
 		method: "POST",

@@ -26,33 +26,26 @@ app.use("/", express.static(__dirname + "/public"));
 /**
  * Verifica certificado en didi-server
  */
-const verifyCert = function (cert, micros, cb, errCb) {
+const verifyCert = async function (cert, micros) {
   const route = process.env.DIDI_API + "/issuer/verifyCertificate";
 
-  fetch(route, {
+  const response = await fetch(route, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       jwt: cert,
       micros: micros,
     }),
-  })
-    .then((response) => {
-      return response.json();
-    })
-    .then((res) => {
-      if (res.status === "error") return errCb(res);
+  });
+  const json = await response.json();
 
-      if (res.data.err) {
-        return cb(res.data.cert, res.data.err.message);
-      } else {
-        return cb(res.data);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      return errCb(err);
-    });
+  if (json.status === "error") throw json;
+
+  if (json.data.err) {
+    return { result: json.data.cert, err: json.data.err.message };
+  }
+
+  return { result: json.data };
 };
 
 /**
@@ -97,59 +90,55 @@ const getPresentation = async (id) => {
   }
 };
 
-const verifyJwt = (jwt, micros) => {
+const verifyJwt = async (jwt, micros) => {
   console.log(jwt);
-  return new Promise(function (resolve, reject) {
-    verifyCert(
-      jwt,
-      micros,
-      function (result, err) {
-        var data = result.payload.vc.credentialSubject;
+  try {
+    const { result, err } = await verifyCert(jwt, micros);
 
-        const credential = Object.values(data)[0];
-        const credentialPreview = credential["preview"]
-          ? credential["preview"]
-          : { fields: [] };
+    const data = result.payload.vc.credentialSubject;
 
-        const credentialData = credential["data"];
-        const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
-          return credentialPreview["fields"].indexOf(b) >=
-            credentialPreview["fields"].indexOf(a)
-            ? 1
-            : -1;
-        });
+    const credential = Object.values(data)[0];
+    const credentialPreview = credential["preview"]
+      ? credential["preview"]
+      : { fields: [] };
 
-        console.log(data);
+    const credentialData = credential["data"];
+    const credentialDataKeys = Object.keys(credentialData).sort((a, b) => {
+      return credentialPreview["fields"].indexOf(b) >=
+        credentialPreview["fields"].indexOf(a)
+        ? 1
+        : -1;
+    });
 
-        const keys = [];
-        for (let key of credentialDataKeys) {
-          const newKey = translateName(key);
-          keys.push(newKey);
-          credentialData[newKey] = {
-            data: translateField(credentialData[key]),
-            toPreview: credentialPreview["fields"].indexOf(key) >= 0,
-          };
-        }
+    console.log(data);
 
-        resolve({
-          jwt: jwt,
-          did: result.payload.sub,
-          iss: result.issuer ? result.issuer : false,
-          credentialData: credentialData,
-          credentialDataKeys: keys,
-          status: result.status,
-          error: err ? err : false,
-        });
-      },
-      function (err) {
-        resolve({
-          iss: false,
-          credential: false,
-          error: err.message,
-        });
-      }
-    );
-  });
+    const keys = [];
+    for (let key of credentialDataKeys) {
+      const newKey = translateName(key);
+      keys.push(newKey);
+      credentialData[newKey] = {
+        data: translateField(credentialData[key]),
+        toPreview: credentialPreview["fields"].indexOf(key) >= 0,
+      };
+    }
+
+    return {
+      jwt: jwt,
+      did: result.payload.sub,
+      iss: result.issuer ? result.issuer : false,
+      credentialData: credentialData,
+      credentialDataKeys: keys,
+      status: result.status,
+      error: err ? err : false,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      iss: false,
+      credential: false,
+      error: error.message,
+    };
+  }
 };
 
 app.get("/api/presentation/:id", async function (req, res) {
@@ -158,17 +147,16 @@ app.get("/api/presentation/:id", async function (req, res) {
     if (jsonRes.status === "error") throw jsonRes;
 
     const { data: jwts } = jsonRes;
-    var micros = undefined;
+    const micros = undefined;
 
-    const promises = [];
+    const results = [];
     for (let jwt of jwts) {
-      const promise = verifyJwt(jwt, micros);
-      promises.push(promise);
+      const result = await verifyJwt(jwt, micros);
+      results.push(result);
     }
 
-    const result = await Promise.all(promises);
     res.render("viewer.html", {
-      data: result,
+      data: results,
     });
   } catch (err) {
     return handleError(res, err);
@@ -180,8 +168,8 @@ app.get("/api/presentation/:id", async function (req, res) {
  * muestra el contenido de cada uno de ellos y/o el error que este retorna
  */
 app.get("/api/credential_viewer/:token/", async function (req, res) {
-  var jwt = req.params.token;
-  var micros = undefined;
+  const jwt = req.params.token;
+  const micros = undefined;
 
   try {
     const result = await verifyJwt(jwt, micros);

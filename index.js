@@ -210,7 +210,7 @@ const translateName = function (name) {
 
 const translateField = function (data) {
   const dateRegex = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)/;
-  if (data.match(dateRegex)) {
+  if (`${data}`.match(dateRegex)) {
     const date = new Date(data);
     return formatFullDate(date);
   }

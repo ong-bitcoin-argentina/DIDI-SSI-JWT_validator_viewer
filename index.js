@@ -112,6 +112,7 @@ const verifyJwt = async (jwt, micros) => {
 		});
 
 		console.log(data);
+		console.log(result);
 
 		const keys = [];
 		for (let key of credentialDataKeys) {
@@ -123,6 +124,7 @@ const verifyJwt = async (jwt, micros) => {
 			};
 		}
 
+		// info a la que se puede acceder en el html como por ejemplo dataElem.status
 		return {
 			jwt: jwt,
 			did: result.payload.sub,

@@ -58,12 +58,41 @@
 							</div>
 							{% else %}
 							<div style="display: flex;justify-content: center;">
-								<h5 id="issName">{{dataElem.iss}}</h5>
-								<i
-									style="color:green;margin-top: 5px;margin-left: 5px;"
-									class="fa fa-check"
-									aria-hidden="true"
-								></i>
+								<ul class="list-group list-group-flush">
+									<li class="list-group-item">
+										<div class="row">
+											<!-- &nbsp es para generar un espacio en blanco -->
+											<span style="font-weight: bold;">
+												Emisor:&nbsp
+											</span>
+											<span>
+												{{dataElem.iss}} 
+											</span>
+											<i
+												style="color:green;margin-top: 5px;margin-left: 5px;"
+												class="fa fa-check"
+												aria-hidden="true"
+											></i>
+										</div>
+									</li>
+									<li class="list-group-item">
+										<div class="row">
+											<span style="font-weight: bold;">
+												Nombre de la Credencial:&nbsp
+											</span>	
+											<span>
+												<!-- Devuelve el valor del campo Credencial -->
+												{{dataElem.credentialData['CREDENCIAL'].data}}
+											</span>										
+											<i
+												style="color:green;margin-top: 5px;margin-left: 5px;"
+												class="fa fa-check"
+												aria-hidden="true"
+											></i>
+										</div>
+									</li>
+								</ul>
+								
 							</div>
 							{% endif %} {% endif %}
 							<small class="text-muted" id="iss"></small>
@@ -90,8 +119,9 @@
 										{% endif %}
 									</div>
 								</li>
-								<!--  TODO: Se remueve hasta implementacion del flujo completo en app aidi
-								{% endfor %} {% if dataElem.status %}
+								{% endfor %} 
+								<!--  TODO: Se remueve hasta implementacion del flujo completo en app aidi 
+								{% if dataElem.status %}
 								<li class="list-group-item">
 									<div class="row">
 										<span class="col-4" style="font-weight: bold;">
@@ -116,11 +146,11 @@
 												VERIFICAR
 											</button>
 
-											{% endif %}
+											{% endif %} 
 										</span>
-									</div>
+									</div> -->
 								</li>
-								{% endif %} -->
+								{% endif %}
 							</ul>
 							<div id="certificateData"></div>
 						</ul>

@@ -124,6 +124,9 @@ const verifyJwt = async (jwt, micros) => {
 			};
 		}
 
+		// Mostrar nombre de la Credencial tomandolo del campo interno de la credencial
+		 const nameCred = translateName(Object.keys(data)) ? translateName(Object.keys(data)) : Object.keys(data)
+
 		// info a la que se puede acceder en el html como por ejemplo dataElem.status
 		return {
 			jwt: jwt,
@@ -133,6 +136,7 @@ const verifyJwt = async (jwt, micros) => {
 			credentialDataKeys: keys,
 			status: result.status,
 			error: err ? err : false,
+			name: nameCred,
 		};
 	} catch (error) {
 		console.log(error);
@@ -210,6 +214,7 @@ const translateName = function (name) {
 		nationality: "Nacionalidad",
 		phoneNumber: "Número de teléfono",
 		email: "Mail",
+		Phone: "Número de teléfono",
 	};
 
 	return translations[name] ? translations[name] : name;

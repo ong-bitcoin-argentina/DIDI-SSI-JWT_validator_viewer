@@ -1,15 +1,12 @@
-<!DOCTYPE html>
-
-<html lang="es">
+<!DOCTYPE html lang="es">
 	{% for dataElem in data %}
-	</br>
 	<head>
 		<meta charset="utf-8" />
 		<meta
 			name="viewport"
 			content="width=device-width, initial-scale=1, shrink-to-fit=no"
 		/>
-		<title>Credenciales</title>
+		<title>Credenciales Verificables Compartidas - APP ai·di</title>
 		<link
 			rel="stylesheet"
 			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -23,82 +20,79 @@
 	</head>
 
 	<body>
-		<div class="container">
+		<div class="MainContent" style="width: 100%; display: flex;flex-direction: column;align-items: center;box-sizing: border-box;">
+			<div class="Header" style="width: 100%;background-color: #5fcdd7;display: flex;justify-content: space-between;padding: 1em;box-sizing: border-box;">
+				<img src="https://issuer.alpha.didi.org.ar/static/media/ai-di-logo.52d38a94.svg" width="100" alt="ai di logo" style="cursor: pointer;">
+			</div>
+			<div class="container">
+				<h1 class="pt-3">Credenciales Verificables Compartidas</h1>
+				<p> Estas credenciales estarán disponible durante 72 hrs a partir de haber sido compartida. Si este link no muestra una credencial solicite al poseedor de la misma que la comparta nuevamente. </p>
+					<p> Ante problemas con esta visualización, por favor, comuniquese con el equipo de <a href="mailto:soporte@aidi.app">Soporte de ai·di</a>.</p>
 			{% if dataElem.error %}
 			<div class="alert alert-danger" role="alert">{{dataElem.error}}</div>
 			{% endif %}
-			<div id="credencial">
-				<div style="display: flex;">
-					<h1 class="display-4 p-3">Credenciales</h1>
-					{% if dataElem.credential === false %}
-					<i
-						style="color:red; margin-top: 25px;"
-						class="fa fa-ban fa-3x"
-						aria-hidden="true"
-					></i>
-					{% else %}
-					<i
-						style="color:green; margin-top: 25px;"
-						class="fa fa-check-circle fa-3x"
-						aria-hidden="true"
-					></i>
-					{% endif %}
-				</div>
+			<div id="credencial" class="pt-4">
 				<div class="card mt-2">
-					<div class="card-body">
-						<div class="cart-title text-center">
+					 <div class="card-header">
+						<div class="cart-title text-left bg-grey">
 							{% if dataElem.credential !== false %} {% if dataElem.iss === false %}
-							<div style="display: flex;justify-content: center;">
 								<h5 id="issName">Emisor no registrado</h5>
 								<i
 									style="color:red;margin-top: 5px;margin-left: 5px;"
 									class="fa fa-times"
 									aria-hidden="true"
 								></i>
-							</div>
 							{% else %}
-							<div style="display: flex;justify-content: center;">
-								<ul class="list-group list-group-flush">
-									<li class="list-group-item">
+								<ul>
+									<li>
+										<div class="row">
+											<h2 style="font-weight: bold;">
+												Nombre de la Credencial:&nbsp
+											</h2>	
+											<h2>
+												<!-- Devuelve el valor del campo Credencial -->
+												{{dataElem.credentialData['CREDENCIAL'].data}} {% if dataElem.credential === false %}
+											<i
+												style="color:red;"
+												class="fa fa-ban"
+												aria-hidden="true"
+											></i>
+											{% else %}
+											<i
+												style="color:green;"
+												class="fa fa-check-circle"
+												aria-hidden="true"
+											></i>
+											{% endif %}
+											</h2>										
+
+										</div>
+									</li>
+									<li>
 										<div class="row">
 											<!-- &nbsp es para generar un espacio en blanco -->
-											<span style="font-weight: bold;">
+											<h3 style="font-weight: bold;">
 												Emisor:&nbsp
-											</span>
-											<span>
+											</h3>
+											<h3>
 												{{dataElem.iss}} 
-											</span>
+											</h3>
 											<i
 												style="color:green;margin-top: 5px;margin-left: 5px;"
-												class="fa fa-check"
+												class="fa fa-check-circle"
 												aria-hidden="true"
 											></i>
 										</div>
 									</li>
-									<li class="list-group-item">
-										<div class="row">
-											<span style="font-weight: bold;">
-												Nombre de la Credencial:&nbsp
-											</span>	
-											<span>
-												<!-- Devuelve el valor del campo Credencial -->
-												{{dataElem.credentialData['CREDENCIAL'].data}}
-											</span>										
-											<i
-												style="color:green;margin-top: 5px;margin-left: 5px;"
-												class="fa fa-check"
-												aria-hidden="true"
-											></i>
-										</div>
-									</li>
+									
 								</ul>
-								
-							</div>
 							{% endif %} {% endif %}
 							<small class="text-muted" id="iss"></small>
 						</div>
+						</div>
+						<div class="card-body">
 						<ul class="list-group list-group-flush">
-							<ul>
+							<ul class="m-0 p-0">
 								{% for key in dataElem.credentialDataKeys %}
 								<li class="list-group-item">
 									<div class="row">
@@ -106,11 +100,11 @@
 										<span class="col-4" style="font-weight: bold;">
 											{{key}}:
 										</span>
-										<span class="col-8" id="nombre" style="font-weight: bold;">
+										<span class="col-8" id="nombre">
 											{{dataElem.credentialData[key].data}}
 										</span>
 										{% else %}
-										<span class="col-4">
+										<span class="col-4" style="font-weight: bold;">
 											{{key}}:
 										</span>
 										<span class="col-8" id="nombre">
@@ -158,6 +152,7 @@
 				</div>
 			</div>
 		</div>
+	</div>
 	</body>
 	{% endfor %}
 

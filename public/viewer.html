@@ -6,7 +6,7 @@
 			name="viewport"
 			content="width=device-width, initial-scale=1, shrink-to-fit=no"
 		/>
-		<title>Credenciales Verificables Compartidas - APP ai·di</title>
+		<title>Credenciales</title>
 		<link
 			rel="stylesheet"
 			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -97,17 +97,17 @@
 								<li class="list-group-item">
 									<div class="row">
 										{% if dataElem.credentialData[key].toPreview %}
-										<span class="col-4" style="font-weight: bold;">
+										<span class="col-md-6 col-sm-12 col-xs-12" style="font-weight: bold;">
 											{{key}}:
 										</span>
-										<span class="col-8" id="nombre">
+										<span class="col-md-6 col-sm-12 col-xs-12" id="nombre">
 											{{dataElem.credentialData[key].data}}
 										</span>
 										{% else %}
-										<span class="col-4" style="font-weight: bold;">
+										<span class="col-md-6 col-sm-12 col-xs-12" style="font-weight: bold;">
 											{{key}}:
 										</span>
-										<span class="col-8" id="nombre">
+										<span class="col-md-6 col-sm-12 col-xs-12" id="nombre">
 											{{dataElem.credentialData[key].data}}
 										</span>
 										{% endif %}

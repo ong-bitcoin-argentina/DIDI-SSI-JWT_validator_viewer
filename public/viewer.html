@@ -1,5 +1,4 @@
 <!DOCTYPE html lang="es">
-	{% for dataElem in data %}
 	<head>
 		<meta charset="utf-8" />
 		<meta
@@ -28,9 +27,11 @@
 				<h1 class="pt-3">Credenciales Verificables Compartidas</h1>
 				<p> Estas credenciales estarán disponible durante 72 hrs a partir de haber sido compartida. Si este link no muestra una credencial solicite al poseedor de la misma que la comparta nuevamente. </p>
 					<p> Ante problemas con esta visualización, por favor, comuniquese con el equipo de <a href="mailto:soporte@aidi.app">Soporte de ai·di</a>.</p>
+			
 			{% if dataElem.error %}
 			<div class="alert alert-danger" role="alert">{{dataElem.error}}</div>
 			{% endif %}
+			{% for dataElem in data %}
 			<div id="credencial" class="pt-4">
 				<div class="card mt-2">
 					 <div class="card-header">
@@ -141,7 +142,7 @@
 
 											{% endif %} 
 										</span>
-									</div> -->
+									</div>
 								</li>
 								{% endif %}
 							</ul>
@@ -150,10 +151,11 @@
 					</div>
 				</div>
 			</div>
+			{% endfor %}
 		</div>
 	</div>
 	</body>
-	{% endfor %}
+
 
 	<script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
